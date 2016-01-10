@@ -11,7 +11,7 @@
 #include "../Extern/Extern.h"
 #include "../Actuators/Hbridge.h"
 
-#define DEPLOY_TIME 		18	 //Seconds
+#define DEPLOY_TIME 		18	 // Seconds
 
 class ThSolar: public Thread {
 public:

@@ -26,37 +26,44 @@ void Hbridge::init() {
 
 	socket->init(frequency, increments);
 
+	// Enable the H-bridge three times! (Not sure it will cause a problem, but till now it seems ok.)
 	HBRIDGE_EN.init(true, 1, 1);
 
-	inA->init(true, 1, 1);
-	inB->init(true, 1, 0);
+	/* Enable the outputs form the H-bridge. This includes the initial direction. (clockwise)
+	* The polarity of the wiring has to be the same all the time
+	* -> A == Red wire
+	* -> B == Black wire
+	*/
+	inA->init(true, 1, 0);
+	inB->init(true, 1, 1);
+
+	this->clockwise = true;
 
 	socket->write(0);
 }
 
 void Hbridge::setDuty(int duty) {
 
-	/*Changes the polarity of the pins in case:
+	/* Changes the polarity of the pins in case:
 	 *  (1):
 	 *  value < 0 and the spinning direction is clockwise
 	 * 	(2)
 	 * 	value > 0 and the spinning direction is not clockwise
-	 * */
+	 */
 	if (((duty < 0) && (clockwise)) || ((duty > 0) && (!clockwise))) {
-		//toggle direction
+		// Toggle direction
 		clockwise = !clockwise;
 
+		// Toggle the direction in RODOS
 		inA->setPins(~inA->readPins());
 		inB->setPins(~inB->readPins());
 	}
 
-	// sets the value positive
+	// Sets the value positive
 	duty = ABS(duty);
-	//set value in the range form 0 to increments
-	duty = (duty > increments) ? increments : duty;
 
-	//TODO check for the max duty cycle!
-	//MAX_DUTY_CYCLE < increments/value!
+	// Per definition the duty can not be higher hand the increments so there is a saturation to this value
+	duty = (duty > increments) ? increments : duty;
 
 	socket->write(duty);
 }

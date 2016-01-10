@@ -21,7 +21,8 @@ public:
 	void gyrCalibrate();
 	void setAlpha(int alpha);
 
-	//setter for the private values
+	// Setter for the private values to control from outside
+	// the functions.
 	void setFlag() {
 		flag = true;
 	}
@@ -101,7 +102,6 @@ private:
 
 	// Reference to the motor
 	Hbridge *flWheel;
-
 };
 
 #endif /* SENSOR_THIMUREAD_H_ */

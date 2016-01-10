@@ -52,10 +52,12 @@ enum tc {
 	CTKP,
 	CTSP,
 	CTTO,
+
 	// Attitude Sensors
 	ACCC,
 	GYRC,
 	MAGC,
+
 	// Other
 	HELP,
 	RESE,

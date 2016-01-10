@@ -29,7 +29,7 @@ ThImuRead::ThImuRead(const char* name, Hbridge *flWheel) {
 	value = 0;				// Default value used for the TC
 
 	send = true;     		// Sending continuously values to the GS
-	gyrCalFlag = true;     	// Gyroscope calibration by default enabled
+	gyrCalFlag = false;     // Gyroscope calibration by default enabled but without standstill
 
 	motorCtrl = false;
 	setPointFlag = false;
@@ -55,40 +55,45 @@ void ThImuRead::run() {
 	AHRS ahrs(0.01);
 	char sprintOut[100];
 
-	//sample time set to 10 Milliseconds
+	// Sample time set to 10 Milliseconds
 	PiController controller;
 	unsigned int duty = 0;
 
 	flWheel->init();
-	setPoint = 0;     //setpoint for the controller
+	setPoint = 0;     // Setpoint for the controller
 
-	//endless loop with calibartion
+	// Initial calibration of the gyroscope without a standstill wait.
+	imu.gyrCalibrate(0);
+
+	// Endless loop with:
+	// -> inner reading values loop
+	// -> outer calibration loop
 	while (1) {
-		//Gyro calibration with TC. Sets all ahrs values to zero.
+		//Gyro calibration with TC. Sets all AHRS values to zero.
 		if (gyrCalFlag) {
-			imu.gyrCalibrate();
+			imu.gyrCalibrate(3);
 			ahrs.setAllValuesToZero();
 		}
 
-		//Magnetometer calibration with TC. Sets all ahrs values to zero.
+		// Magnetometer calibration with TC. Sets all AHRS values to zero.
 		else if (magCalFlag) {
 			imu.magCalibrate();
 			ahrs.setAllValuesToZero();
 		}
 
-		//Gyro calibration with TC. Sets all ahrs values to zero.
+		// Gyroscope calibration with TC. Sets all AHRS values to zero.
 		else if (accCalFlag) {
 			imu.accCalibrate();
 			ahrs.setAllValuesToZero();
 		}
 
-		//Change the alpha factor of the ahrs
+		// Change the alpha factor of the AHRS
 		else if (changeAlphaFlag) {
 			PRINTF("AHRS: New alpha %f \r\n", (value / 100.00));
 			ahrs.setAlpha((value / 100.00));
 		}
 
-		//Controller setpoint change
+		// Controller setpoint change
 		else if (epsilonFlag) {
 			controller.setEpsion((value / 1000.00));
 			PRINTF("Controller new epsilon value %f \r\n", controller.epsilon);
@@ -116,7 +121,7 @@ void ThImuRead::run() {
 
 		flag = magCalFlag = gyrCalFlag = accCalFlag = changeAlphaFlag = setPointFlag = kpFlag = kdFlag = kiFlag = epsilonFlag = false;
 
-		//inner read loop
+		// Inner read loop and control loop
 		while (1) {
 			imu.accRead();
 			imu.gyrRead();
@@ -124,7 +129,7 @@ void ThImuRead::run() {
 
 			//ahrs.filteUpdate(imu.gyr.dx, imu.gyr.dy, imu.gyr.dz, imu.acc.x, imu.acc.y, imu.acc.z, imu.mag.x, imu.mag.y, imu.mag.z);
 
-			// input value is just the gyro dz value!
+			// Input value is just the gyroscope dz value!
 			duty = controller.velocityPI(setPoint, imu.gyr.dz);
 
 			if ((cnt++ > 10) && (send)) {
@@ -148,16 +153,17 @@ void ThImuRead::run() {
 				PRINTF("-------------------\r\n");
 			}
 
-			//enables/disables motor controller
+			// Enables/disables motor controller
 				if (motorCtrl) {
 					flWheel->setDuty(duty);
 				} else {
 					flWheel->setDuty(0);
 				}
 
-
+			// This flag is toggled to leave the inner loop and to go to the calibration outer loop.
 			if (flag)
 				break;
+
 			suspendCallerUntil(NOW()+10*MILLISECONDS);
 		}
 	}

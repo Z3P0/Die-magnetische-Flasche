@@ -86,7 +86,7 @@ public:
 
 	// Gyroscope
 	void gyrRead();
-	void gyrCalibrate();
+	void gyrCalibrate(int warningTimer);
 
 	// Magnetometer
 	void magRead();
