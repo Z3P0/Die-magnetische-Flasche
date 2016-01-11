@@ -36,13 +36,19 @@ Telecommand telecmds[] = {     // Controller
 		{ "IRDO", "00000000", "Infrared sensor move down" },
 		{ "IRST", "00000000", "Infrared sensor move stop" },
 		{ "IRUP", "00000000", "Infrared sensor move up" },
+
 		// Modes
 		{ "KNIF", "00000000", "Sets the thermal knife motor to a value" },
 		{ "DEPL", "00000000", "Start the deployment of the solar panels by hand" },
 		{ "FSUN", "00000000", "Find the sun and point to it and deploy the solar panels" },
 		{ "PICT", "00000000", 0, 360, "Take picture at a setpoint" },
 		{ "PONT", "00000000", 0, 360, "Point the s/c to a degree value." },
-		{ "TRAC", "00000000", 0, 360, "Turn the s/c with a constant velocity" } };
+		{ "TRAC", "00000000", 0, 360, "Turn the s/c with a constant velocity" },
+
+		{ "MISSION", "00000000", "Start mission" },
+		{ "IRSMP", "00000000", 0, 50, "Sample IR for calibration" } };
+
+
 
 enum tc {
 	//Controller
@@ -74,7 +80,10 @@ enum tc {
 	FSUN,
 	PICT,
 	PONT,
-	TRAC
+	TRAC,
+
+	MISSION,
+	IRSMP
 };
 
 class ThTelecommand: public Thread {

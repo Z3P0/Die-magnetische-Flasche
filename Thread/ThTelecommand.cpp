@@ -11,6 +11,8 @@
 #include "ThImuRead.h"
 #include "ThSolar.h"
 #include "../TCTM/Telecommand.h"
+#include "ThMission.h"
+#include "../Sensor/ADC/IR.h"
 
 // Threads objects
 ThTelemetry tm("Telemetry");
@@ -26,6 +28,11 @@ ThSolar thSolar("Solar", &thKnife);
 
 // The IMU thread gets the reference to flywheel
 ThImuRead imuRead("IMURead", &flWheel);
+
+//IR sensor: gets reference to ADC
+IR irSensor(&ADC_1);
+//Mission thread: gets reference to IR sensor
+ThMission thMission("Mission", &irSensor);
 
 ThTelecommand::ThTelecommand(const char* name) {
 	cmd = value = 0;
@@ -216,6 +223,14 @@ void ThTelecommand::exectue() {
 
 	case (TRAC):
 		PRINTF("TC: TODO point mode");
+		break;
+
+	case (MISSION):
+		thMission.toggleMission();
+		break;
+
+	case (IRSMP):
+		irSensor.sample(value);
 		break;
 
 	default:

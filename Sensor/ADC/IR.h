@@ -11,16 +11,25 @@
 #include "../../Define/Define.h"
 #include "../../Extern/Extern.h"
 
-#define ADC_CH_1 	ADC_CH_001 // PA1
+#define ADC_CH 	ADC_CH_011 // PC1
 
 class IR {
 public:
-	IR();
+	IR(HAL_ADC * adc);
 	virtual ~IR();
-	int32_t read();
+	float read();
+	void sample(float distance);
+	void init();
 
 private:
 	void scale();
+	float readInternal();
+	HAL_ADC * sensor;
+	int totalSamples;
+	int MaxSamples;
+	float dist[20];
+	float volt[20];
+	float A, B, C;
 };
 
 #endif /* SENSOR_ADC_IR_H_ */

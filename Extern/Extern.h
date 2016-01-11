@@ -34,5 +34,7 @@ extern HAL_GPIO HBRIDGE_C_INB;
 
 extern HAL_GPIO HBRIDGE_EN;
 
+/* ADC */
+extern HAL_ADC ADC_1;
 
 #endif /* EXTERN_H_ */
