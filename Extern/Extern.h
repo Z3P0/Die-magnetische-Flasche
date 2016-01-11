@@ -40,6 +40,7 @@ extern HAL_PWM HBRIDGE_C;
 extern HAL_GPIO HBRIDGE_C_INA;
 extern HAL_GPIO HBRIDGE_C_INB;
 
+extern HAL_ADC ADC_1;
 
 
 

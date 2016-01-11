@@ -29,12 +29,12 @@ int8_t Current::read(CurrentValues *values) {
 	uint8_t data[2];
 
 	// Read the power register
-	if(I2C_1.writeRead(adress, POWER_REG, 2, data, 2) != 2)
+	//if(I2C_1.writeRead(adress, POWER_REG, 2, data, 2) != 2)
 		return -1;
 	values->power = (int16_t)(data[0] <<8 | data[1]);
 
 	// Read the current register
-	if(I2C_1.writeRead(adress, CURRENT_REG, 2, data, 2) != 2)
+	//if(I2C_1.writeRead(adress, CURRENT_REG, 2, data, 2) != 2)
 		return -1;
 	values->current = (int16_t)(data[0] <<8 | data[1]);
 

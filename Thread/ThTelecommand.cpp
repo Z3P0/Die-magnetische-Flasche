@@ -11,6 +11,8 @@
 #include "ThImuRead.h"
 #include "ThSolar.h"
 #include "../TCTM/Telecommand.h"
+#include "../Sensor/ADC/IR.h"
+#include "ThMission.h"
 
 //Threads objects
 ThTelemetry tm("Telemetry");
