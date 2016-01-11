@@ -7,9 +7,18 @@
 
 #include "Extern.h"
 
+/* I2C 1 - user for the light and the current sensors.*/
 HAL_GPIO I2C_EN(GPIO_055);
+HAL_I2C I2C_1(I2C_IDX1);
 
+/* Communication UART*/
 HAL_UART bluetooth_uart(UART_IDX2);
+
+/* Blue LED - the last that is not effected by the H-bridge*/
+HAL_GPIO BlueLED(GPIO_063);
+
+/* H-Bridges*/
+HAL_GPIO HBRIDGE_EN(GPIO_066);
 
 /* H Bridge A*/
 HAL_PWM  HBRIDGE_A(PWM_IDX12);
@@ -29,7 +38,4 @@ HAL_PWM HBRIDGE_C(PWM_IDX14);
 HAL_GPIO HBRIDGE_C_INA(GPIO_072);
 HAL_GPIO HBRIDGE_C_INB(GPIO_074);
 
-HAL_GPIO HBRIDGE_EN(GPIO_066);
 
-/*ADC*/
-HAL_ADC ADC_1(ADC_IDX2);

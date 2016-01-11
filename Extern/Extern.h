@@ -9,10 +9,18 @@
 #define EXTERN_H_
 #include "Include.h"
 
+/* I2C 1 - user for the light and the current sensors.*/
 extern HAL_GPIO I2C_EN;
+extern HAL_I2C I2C_1;
 
-extern HAL_GPIO BlueLED;
+/* Communication UART*/
 extern HAL_UART bluetooth_uart;
+
+/* Blue LED - the last that is not effected by the H-bridge*/
+extern HAL_GPIO BlueLED;
+
+/* H-Bridges*/
+extern HAL_GPIO HBRIDGE_EN;
 
 /* H Bridge A*/
 extern HAL_PWM  HBRIDGE_A;
@@ -32,9 +40,7 @@ extern HAL_PWM HBRIDGE_C;
 extern HAL_GPIO HBRIDGE_C_INA;
 extern HAL_GPIO HBRIDGE_C_INB;
 
-extern HAL_GPIO HBRIDGE_EN;
 
-/* ADC */
-extern HAL_ADC ADC_1;
+
 
 #endif /* EXTERN_H_ */

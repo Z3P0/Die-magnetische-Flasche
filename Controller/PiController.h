@@ -36,6 +36,7 @@ public:
 	 * The unit of setpoint, actual and EPSILON has to be the same [rad/s] or [deg/s] or [RPM].
 	 */
 	int32_t velocityPI(float setpoint, float actual);
+	int32_t velocityPI2(float setpoint, float actual);
 	int32_t velocityPID(float setpoint, float actual);
 
 	/* Sets the proportional part of the controller*/

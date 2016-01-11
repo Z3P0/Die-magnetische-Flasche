@@ -11,22 +11,18 @@
 #include "ThImuRead.h"
 #include "ThSolar.h"
 #include "../TCTM/Telecommand.h"
-#include "ThMission.h"
-#include "../Sensor/ADC/IR.h"
 
-// Threads objects
+//Threads objects
 ThTelemetry tm("Telemetry");
 ThTelecommand tc("Telecommand");
-
-// Definition of the H-bridges
+/* Definition of the H-bridges*/
 Hbridge thKnife(1000, 1000, &HBRIDGE_A, &HBRIDGE_A_INA, &HBRIDGE_A_INB);
 Hbridge flWheel(1000, 1000, &HBRIDGE_B, &HBRIDGE_B_INA, &HBRIDGE_B_INB);
 Hbridge irMotor(1000, 1000, &HBRIDGE_C, &HBRIDGE_C_INA, &HBRIDGE_C_INB);
 
-// The solar thread gets a reverence to the thermal knife bridge
+/* The solar thread gets a reverence to the thermal knife bridge*/
 ThSolar thSolar("Solar", &thKnife);
-
-// The IMU thread gets the reference to flywheel
+/* The IMU thread gets the reference to flywheel*/
 ThImuRead imuRead("IMURead", &flWheel);
 
 //IR sensor: gets reference to ADC
@@ -55,24 +51,15 @@ void ThTelecommand::run() {
 	bool nbr = false;
 	cmd = value = 0;
 
-	// endless loop
 	while (1) {
 		i = -1;
 		nbr = false;
-		value = 0;
-
 		do {
 			i++;
-			// Suspend until there are data on the bus
 			uart_stdout.suspendUntilDataReady();
-			// read char
 			tmp = toUpperCase(uart_stdout.getcharNoWait());
 			out[i] = tmp;
-			// Stop bit is either a line ending
 			if (tmp == '\n') {
-
-				// If there is a command without a number the do while loop (putting words together) is left
-				// to execute the command.
 				if (!nbr) {
 					out[i] = '\0';
 					cmd = utilization(out);
@@ -83,17 +70,13 @@ void ThTelecommand::run() {
 					break;
 				}
 			}
-			// Command and value has to be separated by space.
 			if (tmp == ' ') {
 				out[i] = '\0';
-				// Starts reading the command.
 				cmd = utilization(out);
 				nbr = true;
 				i = -1;
 			}
 		} while ('\n' != (char) tmp);
-
-		// Executes finally the command with or without the value.
 		exectue();
 	}
 }
@@ -102,7 +85,7 @@ void ThTelecommand::exectue() {
 
 	switch (cmd) {
 
-	// Group: Controller
+	//Controller
 	case (CTEP):
 		//No need for a extra print command!
 		imuRead.setValue(value);
@@ -143,7 +126,7 @@ void ThTelecommand::exectue() {
 		imuRead.toggleSpeedCtrl();
 		break;
 
-	//Group: Attitude Sensors
+		// Attitude Sensors
 	case (ACCC):
 		//No need for a extra print command!
 		imuRead.setFlag();
@@ -162,7 +145,7 @@ void ThTelecommand::exectue() {
 		imuRead.setMagCalFlag();
 		break;
 
-	//Group:  Other
+		// Other
 	case (HELP):
 		for (int i = 0; i < (sizeof(telecmds) / sizeof(Telecommand)); i++)
 			PRINTF(telecmds[i].toString());
@@ -239,7 +222,7 @@ void ThTelecommand::exectue() {
 	}
 }
 
-// Decides which telecommand fits to the send one
+//Decides which telecommand fits to the send one
 int ThTelecommand::utilization(char *tc) {
 	for (int i = 0; i < (sizeof(telecmds) / sizeof(Telecommand)); i++) {
 		if (strcmp(telecmds[i].getCmdStr(), tc) == 0)
@@ -249,7 +232,6 @@ int ThTelecommand::utilization(char *tc) {
 }
 
 // Reads the char value and changes it to an int
-// TODO improvements to read float values!
 int ThTelecommand::getNumber(char *nbr) {
 	bool negative = (nbr[0] == '-') ? true : false;
 	int i = 0;
@@ -273,7 +255,7 @@ int ThTelecommand::getNumber(char *nbr) {
 	return returnNbr;
 }
 
-// Small letters ASCI 97 to 122 are set to upper case.
+// Small letters ASCI 97 to 122 are set to upper case
 char ThTelecommand::toUpperCase(int c) {
 	if ((c > 96) && (c < 123))
 		return (char) (c - 32);

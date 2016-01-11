@@ -11,10 +11,6 @@
 #include "../Sensor/I2C/IMU/IMU.h"
 #include "../Sensor/Filter/MadgwickFilter.h"
 
-#define LED_BLUE GPIO_063
-
-HAL_GPIO BlueLED(LED_BLUE);
-
 ThTelemetry::ThTelemetry(const char* name) {}
 
 ThTelemetry::~ThTelemetry() {}

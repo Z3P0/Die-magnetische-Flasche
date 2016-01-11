@@ -34,12 +34,12 @@ public:
 
 	/* Special functions for the IR Motor*/
 	void moveUp(){
-		setDuty(increments);
+		setDuty(-increments);
 	}
 
 	/* Special functions for the IR Motor*/
 	void moveDown(){
-		setDuty(-increments);
+		setDuty(increments);
 	}
 
 	/* Special functions for the IR Motor*/

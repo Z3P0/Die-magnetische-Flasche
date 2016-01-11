@@ -9,33 +9,29 @@
 #include "../../Define/Define.h"
 #include "../../Extern/Extern.h"
 
-/*Light  Sensor - */
-// The IMU_EN is needed if there is no extern enable for the i2c
-//HAL_GPIO IMU_EN;
-HAL_I2C LIGHT_HAL(I2C_IDX1);
 
 Light::Light() {
-	configurateLight();
+	init();
 }
 
 Light::~Light() {}
 
-void Light::configurateLight() {
+void Light::init() {
 	PRINTF("Configuring light sensor\r\n");
 
-	//I2C 2 enable
+	//I2C 1 enable and initialize
 	I2C_EN.init(true, 1, 1);
-	LIGHT_HAL.init(400000);
+	I2C_1.init(i2c_1_speed);
 
 	//Powers the light sensors up
-	LIGHT_HAL.write(lightAdress, lightCtrlReg, 2);
+	I2C_1.write(lightAdress, lightCtrlReg, 2);
 }
 
 void Light::read() {
 	uint8_t data[2];
-	LIGHT_HAL.writeRead(lightAdress, CHANNEL_0_LOW, 1, data, 2);
+	I2C_1.writeRead(lightAdress, CHANNEL_0_LOW, 1, data, 2);
 	ch0 = ((int16_t) ((data[1] << 8) | data[0]));
-	LIGHT_HAL.writeRead(lightAdress, CHANNEL_1_LOW, 1, data, 2);
+	I2C_1.writeRead(lightAdress, CHANNEL_1_LOW, 1, data, 2);
 	ch1 = ((int16_t) ((data[1] << 8) | data[0]));
 
 	//PRINTF("LIGHT 1 V: %d IR %d Coeff %f\r\n", ch0, ch1, (ch1/(float)ch0));

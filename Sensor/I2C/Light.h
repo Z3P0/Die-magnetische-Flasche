@@ -49,7 +49,7 @@ private:
 	const uint8_t CHANNEL_0_LOW[1] = { CH0_DATA_LOW | 0xA0 };
 	const uint8_t CHANNEL_1_LOW[1] = { CH1_DATA_LOW | 0xA0 };
 
-	void configurateLight();
+	void init();
 	void read();
 };
 

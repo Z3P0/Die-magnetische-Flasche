@@ -18,4 +18,6 @@
 
 #define int16Max		32768
 
+#define i2c_1_speed		400000
+
 #endif /* DEFINE_H_ */

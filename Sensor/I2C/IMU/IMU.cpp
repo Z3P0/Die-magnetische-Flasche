@@ -9,16 +9,16 @@
 #include "../../../Define/Define.h"
 #include "../../../Extern/Extern.h"
 
-/*HAL initialization*/
+/*HAL*/
 HAL_GPIO CS_XM(GPIO_032);     // Chip select Accelerometer and Magnetometer
 HAL_GPIO CS_G(GPIO_018);	  // Chip select Gyroscope
-HAL_I2C IMU_HAL(I2C_IDX2);	  // Integrated IMU is on I2C 2
+HAL_I2C IMU_HAL(I2C_IDX2);
 
 IMU::IMU(Thread *caller) {
 	// Reference to the caller thread to suspend it
 	this->caller = caller;
 	
-	// Set values to zero
+	//set values to zero
 	acc.x = acc.y = acc.z = acc.xOffset = acc.yOffset = acc.zOffset = 0;
 	gyr.dx = gyr.dy = gyr.dz = gyr.dxOffset = gyr.dyOffset = gyr.dzOffset = 0;
 	mag.x = mag.xMin = mag.xDiff = mag.y = mag.yMin = mag.yDiff = mag.z = mag.zMin = mag.zDiff = 0;
@@ -31,20 +31,20 @@ IMU::~IMU() {
 
 void IMU::configurateIMU() {
 	
-	// Chip select
+	//Chip select
 	CS_XM.init(true, 1, 1);
 	CS_G.init(true, 1, 1);
 
-	// Enable IMU
+	//enable IMU
 	I2C_EN.init(true, 1, 1);
 	IMU_HAL.init(400000);
 
-	// Initialize the gyroscope
+	//Initialize the gyroscope
 	errorDetection(IMU_HAL.write(gyrAdress, gyrCtrlReg1, 2), 2);
 	errorDetection(IMU_HAL.write(gyrAdress, gyrCtrlReg4, 2), 2);
 	errorDetection(IMU_HAL.write(gyrAdress, gyrCtrlReg5, 2), 2);
 
-	// Initialize the accelerometer and the magnetometer
+	//Initialize the accelerometer and the magnetometer
 	errorDetection(IMU_HAL.write(accMagAdress, accMagCtrlReg1, 2), 2);
 	errorDetection(IMU_HAL.write(accMagAdress, accMagCtrlReg2, 2), 2);
 	errorDetection(IMU_HAL.write(accMagAdress, accMagCtrlReg5, 2), 2);
@@ -52,7 +52,7 @@ void IMU::configurateIMU() {
 	errorDetection(IMU_HAL.write(accMagAdress, accMagCtrlReg7, 2), 2);
 }
 
-/* Checks if if there is a IMU read error by comparing the written with  the expected number of bytes.*/
+/*Checks if if there is a IMU read error by comparing the written with  the expected number of bytes.*/
 void IMU::errorDetection(int16_t nbrOfReceivedBytes, int8_t expectedNumber) {
 	if (nbrOfReceivedBytes != expectedNumber) {
 		PRINTF("ERROR - IMU\n number of bytes: %d expected %d\r\n", expectedNumber, nbrOfReceivedBytes);
@@ -60,7 +60,7 @@ void IMU::errorDetection(int16_t nbrOfReceivedBytes, int8_t expectedNumber) {
 	}
 }
 
-/* Resets the I2C if there is an error.*/
+/*Resets the I2C if there is an error.*/
 void IMU::resetI2C() {
 	IMU_HAL.reset();
 	caller->suspendCallerUntil(NOW()+ 5*MILLISECONDS);
@@ -75,10 +75,8 @@ void IMU::resetI2C() {
 
 void IMU::accRead() {
 	uint8_t data[6];
-	// Read value and write data to data[].
 	errorDetection(IMU_HAL.writeRead(accMagAdress, accOutAllAxis, 1, data, 6), 6);
 
-	// Shift, merge, scale( factor, offset) the values.
 	acc.x = ((int16_t) ((data[1] << 8) | data[0])) * ACC_SCALING_FACTOR - acc.xOffset;
 	acc.y = ((int16_t) ((data[3] << 8) | data[2])) * ACC_SCALING_FACTOR - acc.yOffset;
 	acc.z = ((int16_t) ((data[5] << 8) | data[4])) * ACC_SCALING_FACTOR - acc.zOffset;
@@ -140,23 +138,21 @@ void IMU::accAxisOffset(float &axisValue, float &axisOffset, char name) {
 
 void IMU::gyrRead() {
 	uint8_t data[6];
-	// Read value and write data to data[].
 	errorDetection(IMU_HAL.writeRead(gyrAdress, gyrOutAllAxis, 1, data, 6), 6);
 
-	// Shift, merge, scale( factor, offset) the values.
 	gyr.dx = (((int16_t) ((data[1] << 8) | data[0])) * GYR_SCALING_FACTOR - gyr.dxOffset);
 	gyr.dy = (((int16_t) ((data[3] << 8) | data[2])) * GYR_SCALING_FACTOR - gyr.dyOffset);
 	gyr.dz = (((int16_t) ((data[5] << 8) | data[4])) * GYR_SCALING_FACTOR - gyr.dzOffset);
 }
 
 /* Standstill calibration - Taking N-samples to get a offset for every axis.*/
-void IMU::gyrCalibrate(int warningTimer = 3) {
+void IMU::gyrCalibrate() {
 	PRINTF("Gyroscope standstill calibration...starts in\r\n");
 	int cnt = 0;
+	int timer = 3;
 
-	// Shows the user a counter so that the s/c has standstill.
-	while (cnt++ < warningTimer) {
-		PRINTF("%d\r\n", warningTimer - cnt);
+	while (cnt++ < timer) {
+		PRINTF("%d\r\n", timer - cnt);
 		caller->suspendCallerUntil(NOW()+ 1*SECONDS);
 	}
 
