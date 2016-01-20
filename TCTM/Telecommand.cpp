@@ -8,7 +8,7 @@
 #include "Telecommand.h"
 #include <stdio.h>
 
-Telecommand::Telecommand(char* cmdStr, char* cmdBin, char* description) {
+Telecommand::Telecommand(char* cmdStr, int cmdBin, char* description) {
 	this->cmdStr = cmdStr;
 	this->cmdBin = cmdBin;
 	this->description = description;
@@ -19,7 +19,7 @@ Telecommand::Telecommand(char* cmdStr, char* cmdBin, char* description) {
 	this->hasValue = false;
 }
 
-Telecommand::Telecommand(char* cmdStr, char* cmdBin,int min, int max,  char* description) {
+Telecommand::Telecommand(char* cmdStr, int cmdBin,int min, int max,  char* description) {
 	this->cmdStr = cmdStr;
 	this->cmdBin = cmdBin;
 	this->description = description;

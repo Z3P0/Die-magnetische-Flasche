@@ -30,7 +30,6 @@ int16_t SerializationUtil::ReadInt16(char* buffer, int index) {
 	int16_t number = 0;
 	for (int i = 1; i >= 0; i--) {
 		number |= ((int16_t) buffer[index++] & 0xFF) << (i * 8);
-		//PRINTF("NUMBER = %d \r\n", number);
 	}
 	return number;
 }

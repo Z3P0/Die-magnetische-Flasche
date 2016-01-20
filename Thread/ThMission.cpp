@@ -6,8 +6,8 @@
  */
 
 #include "ThMission.h"
-#include "../Sensor/Camera/Camera.h"
-Camera cam;
+//#include "../Sensor/Camera/Camera.h"
+//Camera cam;
 ThMission::ThMission(const char* name, IR* ir) {
 	irSensor = ir;
 	missionMode = false;

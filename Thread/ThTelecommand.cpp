@@ -13,6 +13,7 @@
 #include "ThSolar.h"
 #include "../TCTM/Telecommand.h"
 #include "../Sensor/ADC/IR.h"
+#include "../TCTM/SerializationUtil.h"
 #include <stdio.h>
 
 //Threads objects
@@ -45,8 +46,48 @@ void ThTelecommand::init() {
 	flWheel.init();
 	irMotor.init();
 }
+void ThTelecommand::run_binary()
+{
+	char out[6];
+	char tmp;
+	int i = -1;
+	bool nbr = false;
+	cmd = value = 0;
+
+	while (1) {
+		i = -1;
+		nbr = false;
+		for(i= 0; i<6; i++) {
+			uart_stdout.suspendUntilDataReady();
+			out[i] = uart_stdout.getcharNoWait();
+		}
+		cmd = SerializationUtil::ReadInt32(out, 2);
+		//Commands with extra parameter
+		switch(cmd)
+		{
+		case TRAC:
+		case PONT:
+		case PICT:
+		case CTEP:
+		case CTKD:
+		case CTKI:
+		case CTKP:
+		case CTSP:
+		case FWTO:
+			for(i= 0; i<2; i++) {
+				uart_stdout.suspendUntilDataReady();
+				out[i] = uart_stdout.getcharNoWait();
+			}
+			value = SerializationUtil::ReadInt16(out, 0);
+			break;
+		}
+		exectue();
+	}
+}
 
 void ThTelecommand::run() {
+
+	run_binary();
 
 	char out[50];
 	char tmp;
@@ -219,7 +260,7 @@ void ThTelecommand::exectue() {
 		//thMission.toggleMission();
 		break;
 
-	case (IRSMP):
+	case (IRSM):
 		irSensor.sample(value);
 		break;
 

@@ -11,8 +11,8 @@
 class Telecommand {
 
 public:
-	Telecommand(char* cmdStr, char* cmdBin, char* description);
-	Telecommand(char* cmdStr, char* cmdBin, int min, int max, char* description);
+	Telecommand(char* cmdStr, int cmdBin, char* description);
+	Telecommand(char* cmdStr, int cmdBin, int min, int max, char* description);
 	virtual ~Telecommand();
 	char* getCmdStr();
 	char* getBinStr();
@@ -23,7 +23,7 @@ public:
 	char* description;
 
 private:
-	char* cmdBin;
+	int cmdBin;
 	int min;
 	int max;
 	bool hasValue;
