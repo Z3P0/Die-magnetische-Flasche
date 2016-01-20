@@ -14,14 +14,23 @@ HAL_GPIO CS_XM(GPIO_032);     // Chip select Accelerometer and Magnetometer
 HAL_GPIO CS_G(GPIO_018);	  // Chip select Gyroscope
 HAL_I2C IMU_HAL(I2C_IDX2);
 
-IMU::IMU(Thread *caller) {
+IMU::IMU(Thread *caller, float sampleRate) {
 	// Reference to the caller thread to suspend it
 	this->caller = caller;
-	
+
+	// Sample rate for integration of the values from the Gyroscope
+	this->sampleRate = sampleRate;
+
 	//set values to zero
-	acc.x = acc.y = acc.z = acc.xOffset = acc.yOffset = acc.zOffset = 0;
-	gyr.dx = gyr.dy = gyr.dz = gyr.dxOffset = gyr.dyOffset = gyr.dzOffset = 0;
-	mag.x = mag.xMin = mag.xDiff = mag.y = mag.yMin = mag.yDiff = mag.z = mag.zMin = mag.zDiff = 0;
+	acc.x = acc.y = acc.z = 0;
+	accXOff = accYOff = accZOff = 0;
+	gyr.dx = gyr.dy = gyr.dz = 0;
+	gyr.r = gyr.p = gyr.y = 0;
+	gyrDxOff = gyrDyOff = gyrDzOff = 0;
+	mag.x = mag.y = mag.z = 0;
+	magXMin = magXDiff = 0;
+	magYMin = magYDiff = 0;
+	magZMin = magZDiff = 0;
 
 	configurateIMU();
 }
@@ -30,7 +39,7 @@ IMU::~IMU() {
 }
 
 void IMU::configurateIMU() {
-	
+
 	//Chip select
 	CS_XM.init(true, 1, 1);
 	CS_G.init(true, 1, 1);
@@ -77,25 +86,30 @@ void IMU::accRead() {
 	uint8_t data[6];
 	errorDetection(IMU_HAL.writeRead(accMagAdress, accOutAllAxis, 1, data, 6), 6);
 
-	acc.x = ((int16_t) ((data[1] << 8) | data[0])) * ACC_SCALING_FACTOR - acc.xOffset;
-	acc.y = ((int16_t) ((data[3] << 8) | data[2])) * ACC_SCALING_FACTOR - acc.yOffset;
-	acc.z = ((int16_t) ((data[5] << 8) | data[4])) * ACC_SCALING_FACTOR - acc.zOffset;
+	acc.x = ((int16_t) ((data[1] << 8) | data[0])) * ACC_SCALING_FACTOR - accXOff;
+	acc.y = ((int16_t) ((data[3] << 8) | data[2])) * ACC_SCALING_FACTOR - accYOff;
+	acc.z = ((int16_t) ((data[5] << 8) | data[4])) * ACC_SCALING_FACTOR - accZOff;
+
+	//Accelerometer: Roll, pitch angle
+	acc.r = -atan2((double) acc.x, sqrt((double) (acc.y * acc.y + acc.z * acc.z))) * RAD_TO_DEG;
+	acc.p = atan2((double) acc.y, sqrt((double) (acc.x * acc.x + acc.z * acc.z))) * RAD_TO_DEG;
+
 }
 
 void IMU::accSetDefaultValues() {
-	acc.xOffset = ACC_X_OFFSET;
-	acc.yOffset = ACC_Y_OFFSET;
-	acc.zOffset = ACC_Z_OFFSET;
+	accXOff = ACC_X_OFFSET;
+	accYOff = ACC_Y_OFFSET;
+	accZOff = ACC_Z_OFFSET;
 }
 
 /*Finds the offset value for every axis by the distance to the maxim values to 1000.*/
 void IMU::accCalibrate() {
 	PRINTF("Accelerometer calibration started...\r\n");
-	accAxisOffset(acc.x, acc.xOffset, 'X');
-	accAxisOffset(acc.y, acc.yOffset, 'Y');
-	accAxisOffset(acc.z, acc.zOffset, 'Z');
+	accAxisOffset(acc.x, accXOff, 'X');
+	accAxisOffset(acc.y, accYOff, 'Y');
+	accAxisOffset(acc.z, accZOff, 'Z');
 
-	PRINTF("Accelerometer calibration finished. xOffset: %f yOffset: %f zOffset: %f\r\n", acc.xOffset, acc.yOffset, acc.zOffset);
+	PRINTF("Accelerometer calibration finished. xOffset: %f yOffset: %f zOffset: %f\r\n", accXOff, accYOff, accZOff);
 }
 
 /*
@@ -105,7 +119,7 @@ void IMU::accAxisOffset(float &axisValue, float &axisOffset, char name) {
 
 	axisOffset = 0;
 	uint16_t cnt = 0;
-	
+
 	//Display the value until the axis value is bigger than the value (850)
 	while (1) {
 		PRINTF("Put the board in the direction so that the %c-axis is MAX.\r\n", name);
@@ -140,9 +154,14 @@ void IMU::gyrRead() {
 	uint8_t data[6];
 	errorDetection(IMU_HAL.writeRead(gyrAdress, gyrOutAllAxis, 1, data, 6), 6);
 
-	gyr.dx = (((int16_t) ((data[1] << 8) | data[0])) * GYR_SCALING_FACTOR - gyr.dxOffset);
-	gyr.dy = (((int16_t) ((data[3] << 8) | data[2])) * GYR_SCALING_FACTOR - gyr.dyOffset);
-	gyr.dz = (((int16_t) ((data[5] << 8) | data[4])) * GYR_SCALING_FACTOR - gyr.dzOffset);
+	gyr.dx = (((int16_t) ((data[1] << 8) | data[0])) * GYR_SCALING_FACTOR - gyrDxOff);
+	gyr.dy = (((int16_t) ((data[3] << 8) | data[2])) * GYR_SCALING_FACTOR - gyrDyOff);
+	gyr.dz = (((int16_t) ((data[5] << 8) | data[4])) * GYR_SCALING_FACTOR - gyrDzOff);
+
+	// Roll, pitch, yaw
+	gyr.r += (gyr.dy * sampleRate);
+	gyr.p += (gyr.dx * sampleRate);
+	gyr.y += (gyr.dz * sampleRate);
 }
 
 /* Standstill calibration - Taking N-samples to get a offset for every axis.*/
@@ -157,7 +176,7 @@ void IMU::gyrCalibrate() {
 	}
 
 	cnt = 0;
-	gyr.dxOffset = gyr.dyOffset = gyr.dzOffset = 0;
+	gyrDxOff = gyrDyOff = gyrDzOff = 0;
 
 	float gyrX = 0;
 	float gyrY = 0;
@@ -172,11 +191,13 @@ void IMU::gyrCalibrate() {
 
 		caller->suspendCallerUntil(NOW()+ 10*MILLISECONDS);
 	}
-	gyr.dxOffset = gyrX / GYR_CALIBATION_SAMPLES;
-	gyr.dyOffset = gyrY / GYR_CALIBATION_SAMPLES;
-	gyr.dzOffset = gyrZ / GYR_CALIBATION_SAMPLES;
+	gyrDxOff = gyrX / GYR_CALIBATION_SAMPLES;
+	gyrDyOff = gyrY / GYR_CALIBATION_SAMPLES;
+	gyrDzOff = gyrZ / GYR_CALIBATION_SAMPLES;
 
-	PRINTF("Gyroscope offset\r\n  dx %f\r\n  dy %f\r\n  dz %f\r\n", gyr.dxOffset, gyr.dyOffset, gyr.dzOffset);
+	PRINTF("Gyroscope offset\r\n  dx %f\r\n  dy %f\r\n  dz %f\r\n", gyrDxOff, gyrDyOff, gyrDzOff);
+
+	gyr.r = gyr.p = gyr.y = 0;
 }
 
 /*
@@ -187,9 +208,9 @@ void IMU::magRead() {
 	uint8_t data[6];
 	errorDetection(IMU_HAL.writeRead(accMagAdress, magOutAllAxis, 1, data, 6), 6);
 
-	mag.x = ((((int16_t) ((data[1] << 8) | data[0])) * MAG_SCALING_FACTOR - mag.xMin) / mag.xDiff) * 2 - 1;
-	mag.y = ((((int16_t) ((data[3] << 8) | data[2])) * MAG_SCALING_FACTOR - mag.yMin) / mag.yDiff) * 2 - 1;
-	mag.z = ((((int16_t) ((data[5] << 8) | data[4])) * MAG_SCALING_FACTOR - mag.zMin) / mag.zDiff) * 2 - 1;
+	mag.x = (((((int16_t) ((data[1] << 8) | data[0])) * MAG_SCALING_FACTOR - magXMin) / magXDiff) * 2 - 1);
+	mag.y = (((((int16_t) ((data[3] << 8) | data[2])) * MAG_SCALING_FACTOR - magYMin) / magYDiff) * 2 - 1);
+	mag.z = (((((int16_t) ((data[5] << 8) | data[4])) * MAG_SCALING_FACTOR - magZMin) / magZDiff) * 2 - 1);
 }
 
 /*
@@ -223,21 +244,24 @@ void IMU::magCalibrate() {
 		zMax = (tmpZ > zMax) ? tmpZ : zMax;
 		zMin = (tmpZ < zMin) ? tmpZ : zMin;
 
-		if (cnt % 100 == 0)
-			PRINTF("-------------\r\nxMin %d xMax %d\r\nyMin %d yMax %d\r\nzMin %d zMax %d\r\n", (int)(xMin*MAG_SCALING_FACTOR), (int)(xMax*MAG_SCALING_FACTOR), (int)(yMin*MAG_SCALING_FACTOR), (int)(yMax*MAG_SCALING_FACTOR), (int)(zMin*MAG_SCALING_FACTOR), (int)(zMax*MAG_SCALING_FACTOR));
-
+		if (cnt % 100 == 0) {
+			PRINTF("-------------\r\nxMin %d xMax %d\r\nyMin %d yMax %d\r\nzMin %d zMax %d\r\n", (int) (xMin * MAG_SCALING_FACTOR), (int) (xMax * MAG_SCALING_FACTOR),
+					(int) (yMin * MAG_SCALING_FACTOR), (int) (yMax * MAG_SCALING_FACTOR), (int) (zMin * MAG_SCALING_FACTOR), (int) (zMax * MAG_SCALING_FACTOR));
+			//((PRINTF("x:%d\r\ny:%d\r\nz:%d\r\n", tmpX, tmpY, tmpZ);
+			PRINTF("-----------------------\r\n");
+		}
 		caller->suspendCallerUntil(NOW()+ 10*MILLISECONDS);
 	}
 
-	mag.xMin = xMin * MAG_SCALING_FACTOR;
-	mag.yMin = yMin * MAG_SCALING_FACTOR;
-	mag.zMin = zMin * MAG_SCALING_FACTOR;
+	magXMin = magXMin * MAG_SCALING_FACTOR;
+	magXMin = magYMin * MAG_SCALING_FACTOR;
+	magXMin = magZMin * MAG_SCALING_FACTOR;
 
-	mag.xDiff = (xMax - xMin) * MAG_SCALING_FACTOR;
-	mag.yDiff = (yMax - yMin) * MAG_SCALING_FACTOR;
-	mag.zDiff = (zMax - zMin) * MAG_SCALING_FACTOR;
+	magXDiff = (xMax - xMin) * MAG_SCALING_FACTOR;
+	magYDiff = (yMax - yMin) * MAG_SCALING_FACTOR;
+	magZDiff = (zMax - zMin) * MAG_SCALING_FACTOR;
 
-	PRINTF("xMin %f\r\nyMin %f\r\nzMax %f\r\n", mag.xMin, mag.yMin, mag.zMin);
-	PRINTF("xDiff %f yDiff: %f zDiff: %f\r\n", mag.xDiff, mag.yDiff, mag.zDiff);
+	PRINTF("xMin %f\r\nyMin %f\r\nzMax %f\r\n", magXMin, magYMin, magZMin);
+	PRINTF("magXDiff %f yDiff: %f zDiff: %f\r\n", magXDiff, magYDiff, magZDiff);
 }
 

@@ -7,8 +7,14 @@
 
 #ifndef SENSOR_LIGHT_H_
 #define SENSOR_LIGHT_H_
-#include "../../Extern/Include.h"
+#include "../../../Extern/Include.h"
 
+/**
+ *  Light sensor TAOS TSL2561 - https://www.adafruit.com/datasheets/TSL2561.pdf)
+ */
+
+// 				Wiring
+//--------------------------------------------
 // 		 LIGHT SENSOR			    BOARD(I2C_1)          Power
 //	GND 	black  ------------------------------- black   GND
 //	ADDR
@@ -34,8 +40,6 @@ public:
 	 * The silicon detectors respond strongly to the IR light that is invisible for the human eye.
 	 * The sensor has two different IR-diodes to compensate this error. The first thing is to calculate the
 	 * coefficient. After that a formula as described in the data sheet is used.
-	 *
-	 * (TAOS TSL2561 - https://www.adafruit.com/datasheets/TSL2561.pdf)
 	 */
 	float getLuxValue();
 
@@ -50,7 +54,7 @@ private:
 	const uint8_t CHANNEL_1_LOW[1] = { CH1_DATA_LOW | 0xA0 };
 
 	void init();
-	void read();
+	uint8_t read();
 };
 
 #endif /* SENSOR_LIGHT_H_ */

@@ -32,39 +32,35 @@
 #define MAG_Z_DIFF					732  //  |  715 | 698  |  701 |
 
 struct IMU_Acc {
+	// Values are in [RAD]
 	float x;
 	float y;
 	float z;
 
-	float xOffset;
-	float yOffset;
-	float zOffset;
+	// Values are in [DEG]
+	float r;
+	float p;
 };
 
 struct IMU_Gyro {
+	// Values are in [DEG/s]
 	float dx;
 	float dy;
 	float dz;
 
-	// Average of the standstill values
-	float dxOffset;
-	float dyOffset;
-	float dzOffset;
+	// Values are in [DEG]
+	float r;
+	float p;
+	float y;
+
 };
 
 struct IMU_Mag {
+	// Values are in [RAD]
 	float x;
 	float y;
 	float z;
 
-	float xMin;
-	float xDiff;     //xMax - xMin
-
-	float yMin;
-	float yDiff;     //xMax - xMin
-
-	float zMin;
-	float zDiff;     //xMax - xMin
 };
 
 class IMU {
@@ -74,7 +70,7 @@ public:
 	IMU_Gyro gyr;
 	IMU_Mag mag;
 
-	IMU(Thread* caller);
+	IMU(Thread* caller, float sampleRate);
 	virtual ~IMU();
 	void errorDetection(int16_t nbrOfReceivedBytes, int8_t expectedNumber);
 	void resetValues();
@@ -120,6 +116,27 @@ private:
 	const uint8_t accMagCtrlReg5[2] = { CTRL_REG5_XM_ADDRESS, CTRL_REG5_XM_VALUE };
 	const uint8_t accMagCtrlReg6[2] = { CTRL_REG6_XM_ADDRESS, CTRL_REG6_XM_VALUE };
 	const uint8_t accMagCtrlReg7[2] = { CTRL_REG7_XM_ADDRESS, CTRL_REG7_XM_VALUE };
+
+	float sampleRate;
+
+	float accXOff;
+	float accYOff;
+	float accZOff;
+
+	// Average of the standstill values
+	float gyrDxOff;
+	float gyrDyOff;
+	float gyrDzOff;
+
+	float magXMin;
+	float magXDiff;     //xMax - xMin
+
+	float magYMin;
+	float magYDiff;     //xMax - xMin
+
+	float magZMin;
+	float magZDiff;     //xMax - xMin
+
 
 };
 

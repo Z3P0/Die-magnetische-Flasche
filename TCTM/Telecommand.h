@@ -19,11 +19,11 @@ public:
 	bool getValue(int *returnValue);
 	bool isInRange(int value);
 	char* toString();
+	char* cmdStr;
+	char* description;
 
 private:
-	char* cmdStr;
 	char* cmdBin;
-	char* description;
 	int min;
 	int max;
 	bool hasValue;

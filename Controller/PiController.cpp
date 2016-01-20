@@ -6,7 +6,6 @@
  */
 
 #include "PiController.h"
-#include <stdlib.h>    //needed for abs()
 
 PiController::PiController() {
 	dt = 0.01;     				// Sampling time of the control function
@@ -15,7 +14,8 @@ PiController::PiController() {
 	kd = KD;
 
 	epsilon = EPSILON;
-	factor = (PWM_RES / V_MAX);     // PWM Resolution /V_MAX
+	factor = (PWM_RES / V_MAX_HBrdg);     // PWM Resolution /V_MAX
+	output = 0;
 
 	derivative = 0;
 	integral = 0;
@@ -26,87 +26,66 @@ PiController::PiController() {
 PiController::~PiController() {
 }
 
-int32_t PiController::velocityPI(float setpoint, float actual) {
+//this function implements the PI control required to control the velocity of the satellite
+//it outputs the duty cycle to be applied to the pwm
+//parameters= 1)setpoint=desired speed 2)actual= speed from gyro
+unsigned int PiController::pi(float setpoint, float actual) {
 
-	// Calculate error value
+	//Calculate PID
 	error = setpoint - actual;
 
-	// Reduces the steady state error.
-	//In case error is too small then it stops the integration
-	if (ABS(error) > epsilon) {
-		integral += (error * dt);
-	}
+	//In case error is too small then stop integration
+	if (ABS(error) > epsilon)
+		integral = integral + error * dt;
 
-	float output = kp * error + ki * integral;
+	//derivative= (error - pre_error)/dt;
+	//output= Kp*error + Ki*integral + Kd*derivative;
+	output = kp * error + ki * integral;
+
+	//Scale PID output for PWM  (it has to be a value between 0-8v)
+	//output= (output*Vmax)/(226000*setpoint);
+
+	//from angular velocity to voltage   v=w*0.01175
+	output = ABS(output * 0.01175);
 
 	//Saturation filter
-	if (output > V_MAX_HBrdg)
-		output = V_MAX_HBrdg;
-	else if (output < 0)
-		output = 0;
+	if (output > V_MAX)
+		output = V_MAX;
+	else if (output < MIN)
+		output = MIN;
 
-	// Transform the error value to a duty cycle
-	int32_t dutyCycle = (output * factor);     //factor = PWM resolution / Vmax
-	
-	if(setpoint < 0)
-	   	return -dutyCycle;
-
-	return dutyCycle;
+	//duty cycle
+	return ((output / V_MAX) * PWM_RES);
 }
 
+//this function implements the PI control required to control the velocity of the satellite
+//it outputs the duty cycle to be applied to the pwm
+//parameters= 1)setpoint=desired speed 2)actual= speed from gyro
+int32_t PiController::pid(float setpoint, float actual) {
 
-
-
-int32_t PiController::velocityPI2(float setpoint, float actual) {
-
-	// Calculate error value
+	//Calculate PID
 	error = setpoint - actual;
 
-	// Reduces the steady state error.
-	//In case error is too small then it stops the integration
-	if (ABS(error) > epsilon) {
-		integral += (error * dt);
-	}
+	//In case error is too small then stop integration
+	if (ABS(error) > epsilon)
+		integral = integral + error * dt;
 
-	float output = kp * error + ki * integral;
-
-	//Saturation filter
-	if (output > V_MAX_HBrdg)
-		output = V_MAX_HBrdg;
-	else if (output < V_MAX_HBrdg)
-		output = - V_MAX_HBrdg;
-
-	// Transform the error value to a duty cycle
-	int32_t dutyCycle = (output * factor);     //factor = PWM resolution / Vmax
-
-	return dutyCycle;
-}
-
-int32_t PiController::velocityPID(float setpoint, float actual) {
-
-	// Calculate error value
-	error = setpoint - actual;
-
-	// Reduces the steady state error.
-	//In case error is too small then it stops the integration
-	if (ABS(error) > epsilon) {
-		integral += (error * dt);
-	}
-
-	// Derivative value calculation.
 	derivative = (error - preError) / dt;
 
-	float output = kp * error + ki * integral + kd * derivative;
+	preError = error;
+
+	output = kp * error + ki * integral + kd * derivative;
+
+
+	//from angular velocity to voltage
+	//output = ABS(output);
 
 	//Saturation filter
-	if (output > V_MAX_HBrdg)
-		output = V_MAX_HBrdg;
-	else if (output < V_MAX_HBrdg)
-		output = - V_MAX_HBrdg;
+	if (output > V_MAX)
+		output = V_MAX;
+	else if (output < -V_MAX)
+		output = -V_MAX;
 
-	// Transform the error value to a duty cycle
-	int32_t dutyCycle = (output * factor);     //factor = PWM resolution / Vmax
-
-	return dutyCycle;
+	//duty cycle
+	return (output *factor);
 }
-

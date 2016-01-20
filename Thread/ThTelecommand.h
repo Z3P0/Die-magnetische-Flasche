@@ -15,7 +15,8 @@ namespace RODOS {
 extern HAL_UART uart_stdout;
 }
 
-Telecommand telecmds[] = {     // Controller
+Telecommand telecmds[] = {
+		// Controller
 		{ "CTEP", "00000000", 0, 360, "Controller epsilon value" },
 		{ "CTKD", "00000000", 0, 1000, "Controller set kd value" },
 		{ "CTKI", "00000000", 0, 1000, "Controller set ki value" },
@@ -44,9 +45,8 @@ Telecommand telecmds[] = {     // Controller
 		{ "PICT", "00000000", 0, 360, "Take picture at a setpoint" },
 		{ "PONT", "00000000", 0, 360, "Point the s/c to a degree value." },
 		{ "TRAC", "00000000", 0, 360, "Turn the s/c with a constant velocity" },
-
-		{ "MISSION", "00000000", "Start mission" },
-		{ "IRSMP", "00000000", 0, 50, "Sample IR for calibration" } };
+		{ "MISS", "00000000", "Start mission" },
+		{ "IRSM", "00000000", 0, 50, "Sample IR for calibration" } };
 
 
 

@@ -103,12 +103,12 @@
 // Latch up2 interrupt:		not latched			0
 
 #define CTRL_REG6_XM_ADDRESS 	0x25
-#define CTRL_REG6_XM_VALUE 		0b00000000
+#define CTRL_REG6_XM_VALUE 		0b00100000
 
 // CTRL_REG6_XM
 // ---------------------------------
 // -empty-										0
-// Magnetic full-scale selection +-2 g 			00
+// Magnetic full-scale selection +-4 g 			01
 // -empty-										0
 // -empty-										0
 // -empty-										0

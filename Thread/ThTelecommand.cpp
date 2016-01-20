@@ -8,11 +8,12 @@
 #include "ThTelecommand.h"
 #include "ThTelemetry.h"
 #include "ThTelecommand.h"
+#include "ThMission.h"
 #include "ThImuRead.h"
 #include "ThSolar.h"
 #include "../TCTM/Telecommand.h"
 #include "../Sensor/ADC/IR.h"
-#include "ThMission.h"
+#include <stdio.h>
 
 //Threads objects
 ThTelemetry tm("Telemetry");
@@ -30,7 +31,7 @@ ThImuRead imuRead("IMURead", &flWheel);
 //IR sensor: gets reference to ADC
 IR irSensor(&ADC_1);
 //Mission thread: gets reference to IR sensor
-ThMission thMission("Mission", &irSensor);
+//ThMission thMission("Mission", &irSensor);
 
 ThTelecommand::ThTelecommand(const char* name) {
 	cmd = value = 0;
@@ -149,12 +150,16 @@ void ThTelecommand::exectue() {
 
 		// Other
 	case (HELP):
-		for (int i = 0; i < (sizeof(telecmds) / sizeof(Telecommand)); i++)
-			PRINTF(telecmds[i].toString());
+		char out[80];
+		for (int i = 0; i < (sizeof(telecmds) / sizeof(Telecommand)); i++) {
+			sprintf(out, "%s - %s\r\n", telecmds[i].cmdStr, telecmds[i].description);
+			PRINTF(out);
+		}
 		break;
 
 	case (RESE):
 		PRINTF("TC: TODO find a method to reset the S/C\r\n");
+		hwResetAndReboot();
 		break;
 
 	case (SEND):
@@ -166,7 +171,7 @@ void ThTelecommand::exectue() {
 
 	case (FWTO):
 		PRINTF("TC: Motor %d\r\n", value);
-		//flWheel.setDuty(value);
+		flWheel.setDuty(value);
 		break;
 
 	case (IRDO):
@@ -211,7 +216,7 @@ void ThTelecommand::exectue() {
 		break;
 
 	case (MISSION):
-		thMission.toggleMission();
+		//thMission.toggleMission();
 		break;
 
 	case (IRSMP):

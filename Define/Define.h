@@ -15,6 +15,7 @@
 #define RADS_TO_RPM		9.5492965855	// * 60 / (2 * M_PI)
 
 #define ABS(a) 			((a>0)?a:-a)	//Returns the absolute value of a
+#define PI				3.14159
 
 #define int16Max		32768
 

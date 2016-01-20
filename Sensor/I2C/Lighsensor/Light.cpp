@@ -6,8 +6,8 @@
  */
 
 #include "Light.h"
-#include "../../Define/Define.h"
-#include "../../Extern/Extern.h"
+#include "../../../Define/Define.h"
+#include "../../../Extern/Extern.h"
 
 
 Light::Light() {
@@ -27,18 +27,31 @@ void Light::init() {
 	I2C_1.write(lightAdress, lightCtrlReg, 2);
 }
 
-void Light::read() {
+/*
+ * Error check by the number of the returned bytes
+ * return 0 no error
+ * return -1 error
+ */
+uint8_t Light::read() {
 	uint8_t data[2];
-	I2C_1.writeRead(lightAdress, CHANNEL_0_LOW, 1, data, 2);
+	if(I2C_1.writeRead(lightAdress, CHANNEL_0_LOW, 1, data, 2) != 2)
+		return -1;
+
 	ch0 = ((int16_t) ((data[1] << 8) | data[0]));
-	I2C_1.writeRead(lightAdress, CHANNEL_1_LOW, 1, data, 2);
+
+	if(I2C_1.writeRead(lightAdress, CHANNEL_1_LOW, 1, data, 2) != 2)
+		return -1;
+
 	ch1 = ((int16_t) ((data[1] << 8) | data[0]));
 
-	//PRINTF("LIGHT 1 V: %d IR %d Coeff %f\r\n", ch0, ch1, (ch1/(float)ch0));
+	return 0;
 }
 
 float Light::getLuxValue() {
-	read();
+	// Read and check for errors.
+	if(read() == -1)
+		PRINTF("Light sensor read error\r\n");
+
 	float coeff = (ch1/(float)ch0);
 
 	if (coeff <= 0.52){
