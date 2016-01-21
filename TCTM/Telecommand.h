@@ -15,7 +15,7 @@ public:
 	Telecommand(char* cmdStr, int cmdBin, int min, int max, char* description);
 	virtual ~Telecommand();
 	char* getCmdStr();
-	char* getBinStr();
+	int getBinOpcode();
 	bool getValue(int *returnValue);
 	bool isInRange(int value);
 	char* toString();

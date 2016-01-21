@@ -21,4 +21,6 @@
 
 #define i2c_1_speed		400000
 
+#define PROTOCOL_BINARY	false
+
 #endif /* DEFINE_H_ */

@@ -38,8 +38,8 @@ char* Telecommand::getCmdStr(){
 	return cmdStr;
 }
 
-char* Telecommand::getBinStr(){
-	return cmdStr;
+int Telecommand::getBinOpcode(){
+	return cmdBin;
 }
 
 bool Telecommand::isInRange(int value){

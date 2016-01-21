@@ -99,6 +99,7 @@ public:
 	void exectue();
 	void read();
 	void run_binary();
+	void run_text();
 
 	int cmd;
 	int value;

@@ -46,6 +46,8 @@ void ThTelecommand::init() {
 	flWheel.init();
 	irMotor.init();
 }
+
+//Run function for binary protocol
 void ThTelecommand::run_binary()
 {
 	char out[6];
@@ -85,10 +87,8 @@ void ThTelecommand::run_binary()
 	}
 }
 
-void ThTelecommand::run() {
-
-	run_binary();
-
+//Run function for text based protocol (terminal)
+void ThTelecommand::run_text() {
 	char out[50];
 	char tmp;
 	int i = -1;
@@ -125,6 +125,15 @@ void ThTelecommand::run() {
 	}
 }
 
+void ThTelecommand::run()
+{
+	if(PROTOCOL_BINARY)
+		run_binary();
+	else
+		run_text();
+}
+
+//Execute telecommand
 void ThTelecommand::exectue() {
 
 	switch (cmd) {
@@ -274,7 +283,7 @@ void ThTelecommand::exectue() {
 int ThTelecommand::utilization(char *tc) {
 	for (int i = 0; i < (sizeof(telecmds) / sizeof(Telecommand)); i++) {
 		if (strcmp(telecmds[i].getCmdStr(), tc) == 0)
-			return i;
+			return telecmds[i].getBinOpcode();
 	}
 	return -1;
 }
