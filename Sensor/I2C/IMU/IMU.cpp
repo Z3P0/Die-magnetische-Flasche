@@ -225,64 +225,64 @@ void IMU::magReadLSM303DLH() {
 	uint8_t data[6];
 	errorDetection(I2C_2.writeRead(magAdressLSM303, outAllAxisLSM303, 1, data, 6), 6);
 
-	mag.x = (((((int16_t) ((data[0] << 8) | data[1])) * LSM303_MAG_GAIN_XY - magXMin) / magXDiff) * 2 - 1);
-	mag.y = (((((int16_t) ((data[2] << 8) | data[3])) * LSM303_MAG_GAIN_XY - magYMin) / magYDiff) * 2 - 1);
-	mag.z = (((((int16_t) ((data[4] << 8) | data[5])) * LSM303_MAG_GAIN_XY - magZMin) / magZDiff) * 2 - 1);
-	}
+	mag.x = (((((int16_t) ((data[0] << 8) | data[1])) - magXMin) / magXDiff) * 2 - 1);
+	mag.y = (((((int16_t) ((data[2] << 8) | data[3])) - magYMin) / magYDiff) * 2 - 1);
+	mag.z = (((((int16_t) ((data[4] << 8) | data[5])) - magZMin) / magZDiff) * 2 - 1);
+}
 
-	/*
-	 * Hard iron calibration. Calculation of a koeff = 2 *(M[i]max - M[i]min) and a offset = (2 * M[i]min)/(M[i]max -M[i]min) -1
-	 * These values are used in the magRead()
-	 */
-	void IMU::magCalibrate() {
-		uint8_t data[6];
-		uint16_t cnt = 0;
+/*
+ * Hard iron calibration. Calculation of a koeff = 2 *(M[i]max - M[i]min) and a offset = (2 * M[i]min)/(M[i]max -M[i]min) -1
+ * These values are used in the magRead()
+ */
+void IMU::magCalibrate() {
+	uint8_t data[6];
+	uint16_t cnt = 0;
 
-		int16_t xMax, yMax, zMax, xMin, yMin, zMin, tmpX, tmpY, tmpZ;
+	int16_t xMax, yMax, zMax, xMin, yMin, zMin, tmpX, tmpY, tmpZ;
 
-		PRINTF("Magnetometer calibration...\r\nRotate the board around all axis.\r\n");
-		// LSM9DS0
-		//errorDetection(I2C_2.writeRead(accMagAdress, magOutAllAxis, 1, data, 6), 6);
+	PRINTF("Magnetometer calibration...\r\nRotate the board around all axis.\r\n");
+	// LSM9DS0
+	//errorDetection(I2C_2.writeRead(accMagAdress, magOutAllAxis, 1, data, 6), 6);
 
-		// LSM303DHL
+	// LSM303DHL
+	errorDetection(I2C_2.writeRead(magAdressLSM303, outAllAxisLSM303, 1, data, 6), 6);
+	tmpX = xMax = xMin = ((int16_t) ((data[0] << 8) | data[1]));
+	tmpY = yMax = yMin = ((int16_t) ((data[2] << 8) | data[3]));
+	tmpZ = zMax = zMin = ((int16_t) ((data[4] << 8) | data[5]));
+
+	while (cnt++ < MAG_NBR_SCALE_SAMPLES) {
 		errorDetection(I2C_2.writeRead(magAdressLSM303, outAllAxisLSM303, 1, data, 6), 6);
-		tmpX = xMax = xMin = ((int16_t) ((data[0] << 8) | data[1]));
-		tmpY = yMax = yMin = ((int16_t) ((data[2] << 8) | data[3]));
-		tmpZ = zMax = zMin = ((int16_t) ((data[4] << 8) | data[5]));
+		tmpX = ((int16_t) ((data[0] << 8) | data[1]));
+		tmpY = ((int16_t) ((data[2] << 8) | data[3]));
+		tmpZ = ((int16_t) ((data[4] << 8) | data[5]));
 
-		while (cnt++ < MAG_NBR_SCALE_SAMPLES) {
-			errorDetection(I2C_2.writeRead(magAdressLSM303, outAllAxisLSM303, 1, data, 6), 6);
-			tmpX = ((int16_t) ((data[0] << 8) | data[1]));
-			tmpY = ((int16_t) ((data[2] << 8) | data[3]));
-			tmpZ = ((int16_t) ((data[4] << 8) | data[5]));
+		xMax = (tmpX > xMax) ? tmpX : xMax;
+		xMin = (tmpX < xMin) ? tmpX : xMin;
 
-			xMax = (tmpX > xMax) ? tmpX : xMax;
-			xMin = (tmpX < xMin) ? tmpX : xMin;
+		yMax = (tmpY > yMax) ? tmpY : yMax;
+		yMin = (tmpY < yMin) ? tmpY : yMin;
 
-			yMax = (tmpY > yMax) ? tmpY : yMax;
-			yMin = (tmpY < yMin) ? tmpY : yMin;
+		zMax = (tmpZ > zMax) ? tmpZ : zMax;
+		zMin = (tmpZ < zMin) ? tmpZ : zMin;
 
-			zMax = (tmpZ > zMax) ? tmpZ : zMax;
-			zMin = (tmpZ < zMin) ? tmpZ : zMin;
-
-			if (cnt % 100 == 0) {
-				PRINTF("-------------\r\nxMin %d xMax %d\r\nyMin %d yMax %d\r\nzMin %d zMax %d\r\n", (int) (xMin * LSM303_MAG_GAIN_XY), (int) (xMax * LSM303_MAG_GAIN_XY),
-						(int) (yMin * LSM303_MAG_GAIN_XY), (int) (yMax * LSM303_MAG_GAIN_XY), (int) (zMin * LSM303_MAG_GAIN_Z), (int) (zMax * LSM303_MAG_GAIN_Z));
-				//((PRINTF("x:%d\r\ny:%d\r\nz:%d\r\n", tmpX, tmpY, tmpZ);
-				PRINTF("-----------------------\r\n");
-			}
-			caller->suspendCallerUntil(NOW()+ 10*MILLISECONDS);
+		if (cnt % 100 == 0) {
+			PRINTF("-------------\r\nxMin %d xMax %d\r\nyMin %d yMax %d\r\nzMin %d zMax %d\r\n", (int) (xMin * LSM303_MAG_GAIN_XY), (int) (xMax * LSM303_MAG_GAIN_XY),
+					(int) (yMin * LSM303_MAG_GAIN_XY), (int) (yMax * LSM303_MAG_GAIN_XY), (int) (zMin * LSM303_MAG_GAIN_Z), (int) (zMax * LSM303_MAG_GAIN_Z));
+			//((PRINTF("x:%d\r\ny:%d\r\nz:%d\r\n", tmpX, tmpY, tmpZ);
+			PRINTF("-----------------------\r\n");
 		}
-
-		magXMin = magXMin * LSM303_MAG_GAIN_XY;
-		magXMin = magYMin * LSM303_MAG_GAIN_XY;
-		magXMin = magZMin * LSM303_MAG_GAIN_Z;
-
-		magXDiff = (xMax - xMin) * LSM303_MAG_GAIN_XY;
-		magYDiff = (yMax - yMin) * LSM303_MAG_GAIN_XY;
-		magZDiff = (zMax - zMin) * LSM303_MAG_GAIN_Z;
-
-		PRINTF("xMin %f\r\nyMin %f\r\nzMax %f\r\n", magXMin, magYMin, magZMin);
-		PRINTF("magXDiff %f yDiff: %f zDiff: %f\r\n", magXDiff, magYDiff, magZDiff);
+		caller->suspendCallerUntil(NOW()+ 10*MILLISECONDS);
 	}
+
+	magXMin = magXMin * LSM303_MAG_GAIN_XY;
+	magXMin = magYMin * LSM303_MAG_GAIN_XY;
+	magXMin = magZMin * LSM303_MAG_GAIN_Z;
+
+	magXDiff = (xMax - xMin) * LSM303_MAG_GAIN_XY;
+	magYDiff = (yMax - yMin) * LSM303_MAG_GAIN_XY;
+	magZDiff = (zMax - zMin) * LSM303_MAG_GAIN_Z;
+
+	PRINTF("xMin %f\r\nyMin %f\r\nzMax %f\r\n", magXMin, magYMin, magZMin);
+	PRINTF("magXDiff %f yDiff: %f zDiff: %f\r\n", magXDiff, magYDiff, magZDiff);
+}
 

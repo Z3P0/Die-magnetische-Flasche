@@ -128,7 +128,7 @@ void ThImuRead::run() {
 			//imu.magRead();
 			imu.magReadLSM303DLH();
 
-			ahrs.filterUpdate2(&imu.acc, &imu.gyr, &imu.mag);
+			//ahrs.filterUpdate2(&imu.acc, &imu.gyr, &imu.mag);
 
 			// input value is just the gyro dz value!
 			//duty = controller.pi(setPoint, imu.gyr.dz);
@@ -144,8 +144,8 @@ void ThImuRead::run() {
 				sprintf(out, "x %f y %f z %f\r\n", imu.mag.x,  imu.mag.y, imu.mag.z);
 				PRINTF(out);
 //
-				sprintf(out, "tilt   My %d\r\n", (int)ahrs.mY);
-				PRINTF(out);
+//				sprintf(out, "tilt   My %d\r\n", (int)ahrs.mY);
+//				PRINTF(out);
 //
 //				sprintf(out, "simple My %d\r\n", (int)(atan2(imu.mag.y, imu.mag. x))*RAD_TO_DEG);
 //				PRINTF(out);
