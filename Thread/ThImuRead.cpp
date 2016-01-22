@@ -125,7 +125,8 @@ void ThImuRead::run() {
 		while (1) {
 			imu.accRead();
 			imu.gyrRead();
-			imu.magRead();
+			//imu.magRead();
+			imu.magReadLSM303DLH();
 
 			ahrs.filterUpdate2(&imu.acc, &imu.gyr, &imu.mag);
 
@@ -140,15 +141,18 @@ void ThImuRead::run() {
 
 				char out[80];
 
+				sprintf(out, "x %f y %f z %f\r\n", imu.mag.x,  imu.mag.y, imu.mag.z);
+				PRINTF(out);
+//
 				sprintf(out, "tilt   My %d\r\n", (int)ahrs.mY);
 				PRINTF(out);
-
-				sprintf(out, "simple My %d\r\n", (int)(atan2(imu.mag.y, imu.mag. x))*RAD_TO_DEG);
-				PRINTF(out);
-
-
-				sprintf(out, "Gy %+.2f\r\n", imu.gyr.y);
-				PRINTF(out);
+//
+//				sprintf(out, "simple My %d\r\n", (int)(atan2(imu.mag.y, imu.mag. x))*RAD_TO_DEG);
+//				PRINTF(out);
+//
+//
+//				sprintf(out, "Gy %+.2f\r\n", imu.gyr.y);
+//				PRINTF(out);
 
 //				sprintf(out, "G y%+d\r\n", (int) imu.gyr.y);
 //				PRINTF(out);
@@ -196,7 +200,7 @@ void ThImuRead::run() {
 
 			if (flag)
 				break;
-			suspendCallerUntil(NOW()+10*MILLISECONDS);
+			suspendCallerUntil(NOW()+15*MILLISECONDS);
 		}
 	}
 }

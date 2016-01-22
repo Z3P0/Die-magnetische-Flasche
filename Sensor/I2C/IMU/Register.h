@@ -11,6 +11,9 @@
 #ifndef REGISTERS_H_
 #define REGISTERS_H_
 
+
+/*-----LSM9DS0-----*/
+
 /*--Gyrometer--*/
 #define GYRO_ADDRESS			0x6B
 
@@ -130,6 +133,49 @@
 // internal filter bypassed						0
 // Magnetic data rate controlled by REG6		0
 // Magnetic sensor mode selection:	normal mode	0
+
+/*-----LSM303DLH-----*/
+#define LSM303_ADDRESS			0x1E
+#define LSM303DLH_OUT_ALL 		0x83
+#define LSM303DHL_WRITE			0x3C
+
+#define CRA_REG_M_ADDRESS 		0x00
+#define CRA_REG_M_VALUE 		0b00011000
+
+// CRA_REG_M
+// ---------------------------------
+// default									000
+// Minimum data output rate 75 Hz
+// DO2										1
+// DO2										1
+// DO0										0
+// Magnetometer operation mode: normal
+// MS1										0
+// MS2										0
+
+#define CRB_REG_M_ADDRESS 		0x01
+#define CRB_REG_M_VALUE 		0b00100000
+
+// Sensor field input range 1.3 mGs milli Gauss
+#define LSM303_MAG_GAIN_XY		1055
+#define LSM303_MAG_GAIN_Z		950
+// CRA_REG_M
+// ---------------------------------
+// GN 2										0
+// GN 1										0
+// GN 0										1
+// default	 								00000
+
+#define MR_REG_M_ADDRESS 		0x02
+#define MR_REG_M_VALUE 			0b00000000
+
+// CRA_REG_M
+// ---------------------------------
+// default									0000000
+// MD1										0
+// MD2										0
+
+
 
 
 

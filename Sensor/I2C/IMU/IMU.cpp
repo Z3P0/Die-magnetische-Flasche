@@ -12,7 +12,7 @@
 /*HAL*/
 HAL_GPIO CS_XM(GPIO_032);     // Chip select Accelerometer and Magnetometer
 HAL_GPIO CS_G(GPIO_018);	  // Chip select Gyroscope
-HAL_I2C IMU_HAL(I2C_IDX2);
+HAL_I2C I2C_2(I2C_IDX2);
 
 IMU::IMU(Thread *caller, float sampleRate) {
 	// Reference to the caller thread to suspend it
@@ -46,19 +46,24 @@ void IMU::configurateIMU() {
 
 	//enable IMU
 	I2C_EN.init(true, 1, 1);
-	IMU_HAL.init(400000);
+	I2C_2.init(400000);
 
 	//Initialize the gyroscope
-	errorDetection(IMU_HAL.write(gyrAdress, gyrCtrlReg1, 2), 2);
-	errorDetection(IMU_HAL.write(gyrAdress, gyrCtrlReg4, 2), 2);
-	errorDetection(IMU_HAL.write(gyrAdress, gyrCtrlReg5, 2), 2);
+	errorDetection(I2C_2.write(gyrAdress, gyrCtrlReg1, 2), 2);
+	errorDetection(I2C_2.write(gyrAdress, gyrCtrlReg4, 2), 2);
+	errorDetection(I2C_2.write(gyrAdress, gyrCtrlReg5, 2), 2);
 
-	//Initialize the accelerometer and the magnetometer
-	errorDetection(IMU_HAL.write(accMagAdress, accMagCtrlReg1, 2), 2);
-	errorDetection(IMU_HAL.write(accMagAdress, accMagCtrlReg2, 2), 2);
-	errorDetection(IMU_HAL.write(accMagAdress, accMagCtrlReg5, 2), 2);
-	errorDetection(IMU_HAL.write(accMagAdress, accMagCtrlReg6, 2), 2);
-	errorDetection(IMU_HAL.write(accMagAdress, accMagCtrlReg7, 2), 2);
+	//Initialize the accelerometer and the magnetometer LSM9DS0
+	errorDetection(I2C_2.write(accMagAdress, accMagCtrlReg1, 2), 2);
+	errorDetection(I2C_2.write(accMagAdress, accMagCtrlReg2, 2), 2);
+	errorDetection(I2C_2.write(accMagAdress, accMagCtrlReg5, 2), 2);
+	errorDetection(I2C_2.write(accMagAdress, accMagCtrlReg6, 2), 2);
+	errorDetection(I2C_2.write(accMagAdress, accMagCtrlReg7, 2), 2);
+
+	//Initialize the accelerometer and the magnetometer LSM303DLH
+	errorDetection(I2C_2.write(magAdressLSM303, crAReg, 2), 2);
+	errorDetection(I2C_2.write(magAdressLSM303, crBReg, 2), 2);
+	errorDetection(I2C_2.write(magAdressLSM303, mrReg, 2), 2);
 }
 
 /*Checks if if there is a IMU read error by comparing the written with  the expected number of bytes.*/
@@ -71,9 +76,9 @@ void IMU::errorDetection(int16_t nbrOfReceivedBytes, int8_t expectedNumber) {
 
 /*Resets the I2C if there is an error.*/
 void IMU::resetI2C() {
-	IMU_HAL.reset();
+	I2C_2.reset();
 	caller->suspendCallerUntil(NOW()+ 5*MILLISECONDS);
-	IMU_HAL.init(400000);
+	I2C_2.init(400000);
 	I2C_EN.setPins(0);
 	PRINTF("RESET I2C!\r\n");
 	caller->suspendCallerUntil(NOW()+ 5*MILLISECONDS);
@@ -84,7 +89,7 @@ void IMU::resetI2C() {
 
 void IMU::accRead() {
 	uint8_t data[6];
-	errorDetection(IMU_HAL.writeRead(accMagAdress, accOutAllAxis, 1, data, 6), 6);
+	errorDetection(I2C_2.writeRead(accMagAdress, accOutAllAxis, 1, data, 6), 6);
 
 	acc.x = ((int16_t) ((data[1] << 8) | data[0])) * ACC_SCALING_FACTOR - accXOff;
 	acc.y = ((int16_t) ((data[3] << 8) | data[2])) * ACC_SCALING_FACTOR - accYOff;
@@ -152,7 +157,7 @@ void IMU::accAxisOffset(float &axisValue, float &axisOffset, char name) {
 
 void IMU::gyrRead() {
 	uint8_t data[6];
-	errorDetection(IMU_HAL.writeRead(gyrAdress, gyrOutAllAxis, 1, data, 6), 6);
+	errorDetection(I2C_2.writeRead(gyrAdress, gyrOutAllAxis, 1, data, 6), 6);
 
 	gyr.dx = (((int16_t) ((data[1] << 8) | data[0])) * GYR_SCALING_FACTOR - gyrDxOff);
 	gyr.dy = (((int16_t) ((data[3] << 8) | data[2])) * GYR_SCALING_FACTOR - gyrDyOff);
@@ -206,7 +211,7 @@ void IMU::gyrCalibrate() {
  */
 void IMU::magRead() {
 	uint8_t data[6];
-	errorDetection(IMU_HAL.writeRead(accMagAdress, magOutAllAxis, 1, data, 6), 6);
+	errorDetection(I2C_2.writeRead(accMagAdress, magOutAllAxis, 1, data, 6), 6);
 
 	mag.x = (((((int16_t) ((data[1] << 8) | data[0])) * MAG_SCALING_FACTOR - magXMin) / magXDiff) * 2 - 1);
 	mag.y = (((((int16_t) ((data[3] << 8) | data[2])) * MAG_SCALING_FACTOR - magYMin) / magYDiff) * 2 - 1);
@@ -214,54 +219,70 @@ void IMU::magRead() {
 }
 
 /*
- * Hard iron calibration. Calculation of a koeff = 2 *(M[i]max - M[i]min) and a offset = (2 * M[i]min)/(M[i]max -M[i]min) -1
- * These values are used in the magRead()
+ * LSM303DLH
  */
-void IMU::magCalibrate() {
+void IMU::magReadLSM303DLH() {
 	uint8_t data[6];
-	uint16_t cnt = 0;
+	errorDetection(I2C_2.writeRead(magAdressLSM303, outAllAxisLSM303, 1, data, 6), 6);
 
-	int16_t xMax, yMax, zMax, xMin, yMin, zMin, tmpX, tmpY, tmpZ;
-
-	PRINTF("Magnetometer calibration...\r\nRotate the board around all axis.\r\n");
-	errorDetection(IMU_HAL.writeRead(accMagAdress, magOutAllAxis, 1, data, 6), 6);
-	tmpX = xMax = xMin = ((int16_t) ((data[1] << 8) | data[0]));
-	tmpY = yMax = yMin = ((int16_t) ((data[3] << 8) | data[2]));
-	tmpZ = zMax = zMin = ((int16_t) ((data[5] << 8) | data[4]));
-
-	while (cnt++ < MAG_NBR_SCALE_SAMPLES) {
-		errorDetection(IMU_HAL.writeRead(accMagAdress, magOutAllAxis, 1, data, 6), 6);
-		tmpX = ((int16_t) ((data[1] << 8) | data[0]));
-		tmpY = ((int16_t) ((data[3] << 8) | data[2]));
-		tmpZ = ((int16_t) ((data[5] << 8) | data[4]));
-
-		xMax = (tmpX > xMax) ? tmpX : xMax;
-		xMin = (tmpX < xMin) ? tmpX : xMin;
-
-		yMax = (tmpY > yMax) ? tmpY : yMax;
-		yMin = (tmpY < yMin) ? tmpY : yMin;
-
-		zMax = (tmpZ > zMax) ? tmpZ : zMax;
-		zMin = (tmpZ < zMin) ? tmpZ : zMin;
-
-		if (cnt % 100 == 0) {
-			PRINTF("-------------\r\nxMin %d xMax %d\r\nyMin %d yMax %d\r\nzMin %d zMax %d\r\n", (int) (xMin * MAG_SCALING_FACTOR), (int) (xMax * MAG_SCALING_FACTOR),
-					(int) (yMin * MAG_SCALING_FACTOR), (int) (yMax * MAG_SCALING_FACTOR), (int) (zMin * MAG_SCALING_FACTOR), (int) (zMax * MAG_SCALING_FACTOR));
-			//((PRINTF("x:%d\r\ny:%d\r\nz:%d\r\n", tmpX, tmpY, tmpZ);
-			PRINTF("-----------------------\r\n");
-		}
-		caller->suspendCallerUntil(NOW()+ 10*MILLISECONDS);
+	mag.x = (((((int16_t) ((data[0] << 8) | data[1])) * LSM303_MAG_GAIN_XY - magXMin) / magXDiff) * 2 - 1);
+	mag.y = (((((int16_t) ((data[2] << 8) | data[3])) * LSM303_MAG_GAIN_XY - magYMin) / magYDiff) * 2 - 1);
+	mag.z = (((((int16_t) ((data[4] << 8) | data[5])) * LSM303_MAG_GAIN_XY - magZMin) / magZDiff) * 2 - 1);
 	}
 
-	magXMin = magXMin * MAG_SCALING_FACTOR;
-	magXMin = magYMin * MAG_SCALING_FACTOR;
-	magXMin = magZMin * MAG_SCALING_FACTOR;
+	/*
+	 * Hard iron calibration. Calculation of a koeff = 2 *(M[i]max - M[i]min) and a offset = (2 * M[i]min)/(M[i]max -M[i]min) -1
+	 * These values are used in the magRead()
+	 */
+	void IMU::magCalibrate() {
+		uint8_t data[6];
+		uint16_t cnt = 0;
 
-	magXDiff = (xMax - xMin) * MAG_SCALING_FACTOR;
-	magYDiff = (yMax - yMin) * MAG_SCALING_FACTOR;
-	magZDiff = (zMax - zMin) * MAG_SCALING_FACTOR;
+		int16_t xMax, yMax, zMax, xMin, yMin, zMin, tmpX, tmpY, tmpZ;
 
-	PRINTF("xMin %f\r\nyMin %f\r\nzMax %f\r\n", magXMin, magYMin, magZMin);
-	PRINTF("magXDiff %f yDiff: %f zDiff: %f\r\n", magXDiff, magYDiff, magZDiff);
-}
+		PRINTF("Magnetometer calibration...\r\nRotate the board around all axis.\r\n");
+		// LSM9DS0
+		//errorDetection(I2C_2.writeRead(accMagAdress, magOutAllAxis, 1, data, 6), 6);
+
+		// LSM303DHL
+		errorDetection(I2C_2.writeRead(magAdressLSM303, outAllAxisLSM303, 1, data, 6), 6);
+		tmpX = xMax = xMin = ((int16_t) ((data[0] << 8) | data[1]));
+		tmpY = yMax = yMin = ((int16_t) ((data[2] << 8) | data[3]));
+		tmpZ = zMax = zMin = ((int16_t) ((data[4] << 8) | data[5]));
+
+		while (cnt++ < MAG_NBR_SCALE_SAMPLES) {
+			errorDetection(I2C_2.writeRead(magAdressLSM303, outAllAxisLSM303, 1, data, 6), 6);
+			tmpX = ((int16_t) ((data[0] << 8) | data[1]));
+			tmpY = ((int16_t) ((data[2] << 8) | data[3]));
+			tmpZ = ((int16_t) ((data[4] << 8) | data[5]));
+
+			xMax = (tmpX > xMax) ? tmpX : xMax;
+			xMin = (tmpX < xMin) ? tmpX : xMin;
+
+			yMax = (tmpY > yMax) ? tmpY : yMax;
+			yMin = (tmpY < yMin) ? tmpY : yMin;
+
+			zMax = (tmpZ > zMax) ? tmpZ : zMax;
+			zMin = (tmpZ < zMin) ? tmpZ : zMin;
+
+			if (cnt % 100 == 0) {
+				PRINTF("-------------\r\nxMin %d xMax %d\r\nyMin %d yMax %d\r\nzMin %d zMax %d\r\n", (int) (xMin * LSM303_MAG_GAIN_XY), (int) (xMax * LSM303_MAG_GAIN_XY),
+						(int) (yMin * LSM303_MAG_GAIN_XY), (int) (yMax * LSM303_MAG_GAIN_XY), (int) (zMin * LSM303_MAG_GAIN_Z), (int) (zMax * LSM303_MAG_GAIN_Z));
+				//((PRINTF("x:%d\r\ny:%d\r\nz:%d\r\n", tmpX, tmpY, tmpZ);
+				PRINTF("-----------------------\r\n");
+			}
+			caller->suspendCallerUntil(NOW()+ 10*MILLISECONDS);
+		}
+
+		magXMin = magXMin * LSM303_MAG_GAIN_XY;
+		magXMin = magYMin * LSM303_MAG_GAIN_XY;
+		magXMin = magZMin * LSM303_MAG_GAIN_Z;
+
+		magXDiff = (xMax - xMin) * LSM303_MAG_GAIN_XY;
+		magYDiff = (yMax - yMin) * LSM303_MAG_GAIN_XY;
+		magZDiff = (zMax - zMin) * LSM303_MAG_GAIN_Z;
+
+		PRINTF("xMin %f\r\nyMin %f\r\nzMax %f\r\n", magXMin, magYMin, magZMin);
+		PRINTF("magXDiff %f yDiff: %f zDiff: %f\r\n", magXDiff, magYDiff, magZDiff);
+	}
 

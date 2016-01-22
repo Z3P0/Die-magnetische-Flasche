@@ -32,7 +32,7 @@ ThImuRead imuRead("IMURead", &flWheel);
 //IR sensor: gets reference to ADC
 IR irSensor(&ADC_1);
 //Mission thread: gets reference to IR sensor
-//ThMission thMission("Mission", &irSensor);
+ThMission thMission("Mission", &irSensor);
 
 ThTelecommand::ThTelecommand(const char* name) {
 	cmd = value = 0;

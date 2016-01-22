@@ -17,6 +17,7 @@ PiController::PiController() {
 	factor = (PWM_RES / V_MAX_HBrdg);     // PWM Resolution /V_MAX
 	output = 0;
 
+	duty = 0;
 	derivative = 0;
 	integral = 0;
 	error = 0;

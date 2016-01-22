@@ -85,6 +85,7 @@ public:
 	void gyrCalibrate();
 
 	// Magnetometer
+	void magReadLSM303DLH();
 	void magRead();
 	void magCalibrate();
 	void magSetDefaultValues();
@@ -105,7 +106,7 @@ private:
 	const uint8_t gyrCtrlReg4[2] = { CTRL_REG4_G_ADDRESS, CTRL_REG4_G_VALUE };
 	const uint8_t gyrCtrlReg5[2] = { CTRL_REG5_G_ADDRESS, CTRL_REG5_G_VALUE };
 
-	/* Magnetometer Accelerometer*/
+	/* Magnetometer Accelerometer - LSM9DS0*/
 	const uint8_t accMagAdress = ACC_MAG_ADDRESS;
 
 	const uint8_t accOutAllAxis[1] = { ACC_OUT_ALL_AXIS };
@@ -116,6 +117,15 @@ private:
 	const uint8_t accMagCtrlReg5[2] = { CTRL_REG5_XM_ADDRESS, CTRL_REG5_XM_VALUE };
 	const uint8_t accMagCtrlReg6[2] = { CTRL_REG6_XM_ADDRESS, CTRL_REG6_XM_VALUE };
 	const uint8_t accMagCtrlReg7[2] = { CTRL_REG7_XM_ADDRESS, CTRL_REG7_XM_VALUE };
+
+	/* Magnetometer Accelerometer - LSM303DLH*/
+	const uint8_t outAllAxisLSM303[1] = { LSM303DLH_OUT_ALL };
+	const uint8_t magWriteLSM303 = LSM303DHL_WRITE;
+	const uint8_t magAdressLSM303 = LSM303_ADDRESS;
+	const uint8_t crAReg[2] = { CRA_REG_M_ADDRESS,CRA_REG_M_VALUE};
+	const uint8_t crBReg[2] = { CRB_REG_M_ADDRESS,CRB_REG_M_VALUE};
+	const uint8_t mrReg[2] = { MR_REG_M_ADDRESS, MR_REG_M_VALUE};
+
 
 	float sampleRate;
 
