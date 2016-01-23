@@ -206,28 +206,15 @@ void IMU::gyrCalibrate() {
 }
 
 /*
- * IMU data calibrated by the hard iron calibration values.
- * M[i]_s = (M[i] - M[i]_min)/(M[i]_max - M[i]_min)* 2 - 1
- */
-void IMU::magRead() {
-	uint8_t data[6];
-	errorDetection(I2C_2.writeRead(accMagAdress, magOutAllAxis, 1, data, 6), 6);
-
-	mag.x = (((((int16_t) ((data[1] << 8) | data[0])) * MAG_SCALING_FACTOR - magXMin) / magXDiff) * 2 - 1);
-	mag.y = (((((int16_t) ((data[3] << 8) | data[2])) * MAG_SCALING_FACTOR - magYMin) / magYDiff) * 2 - 1);
-	mag.z = (((((int16_t) ((data[5] << 8) | data[4])) * MAG_SCALING_FACTOR - magZMin) / magZDiff) * 2 - 1);
-}
-
-/*
  * LSM303DLH
  */
 void IMU::magReadLSM303DLH() {
 	uint8_t data[6];
 	errorDetection(I2C_2.writeRead(magAdressLSM303, outAllAxisLSM303, 1, data, 6), 6);
 
-	mag.x = (((((int16_t) ((data[0] << 8) | data[1])) - magXMin) / magXDiff) * 2 - 1);
-	mag.y = (((((int16_t) ((data[2] << 8) | data[3])) - magYMin) / magYDiff) * 2 - 1);
-	mag.z = (((((int16_t) ((data[4] << 8) | data[5])) - magZMin) / magZDiff) * 2 - 1);
+	mag.x = ((int16_t) (((data[0] << 8) | data[1]) - magXMin / magXDiff) * 2 - 1);
+	mag.y = ((int16_t) (((data[2] << 8) | data[3]) - magYMin / magYDiff) * 2 - 1);
+	mag.z = ((int16_t) (((data[4] << 8) | data[5]) - magZMin / magZDiff) * 2 - 1);
 }
 
 /*
@@ -241,11 +228,10 @@ void IMU::magCalibrate() {
 	int16_t xMax, yMax, zMax, xMin, yMin, zMin, tmpX, tmpY, tmpZ;
 
 	PRINTF("Magnetometer calibration...\r\nRotate the board around all axis.\r\n");
-	// LSM9DS0
-	//errorDetection(I2C_2.writeRead(accMagAdress, magOutAllAxis, 1, data, 6), 6);
 
 	// LSM303DHL
 	errorDetection(I2C_2.writeRead(magAdressLSM303, outAllAxisLSM303, 1, data, 6), 6);
+
 	tmpX = xMax = xMin = ((int16_t) ((data[0] << 8) | data[1]));
 	tmpY = yMax = yMin = ((int16_t) ((data[2] << 8) | data[3]));
 	tmpZ = zMax = zMin = ((int16_t) ((data[4] << 8) | data[5]));
@@ -274,13 +260,14 @@ void IMU::magCalibrate() {
 		caller->suspendCallerUntil(NOW()+ 10*MILLISECONDS);
 	}
 
-	magXMin = magXMin * LSM303_MAG_GAIN_XY;
-	magXMin = magYMin * LSM303_MAG_GAIN_XY;
-	magXMin = magZMin * LSM303_MAG_GAIN_Z;
+	magXMin = xMin;
+	magYMin = yMin;
+	magZMin = zMin;
 
-	magXDiff = (xMax - xMin) * LSM303_MAG_GAIN_XY;
-	magYDiff = (yMax - yMin) * LSM303_MAG_GAIN_XY;
-	magZDiff = (zMax - zMin) * LSM303_MAG_GAIN_Z;
+
+	magXDiff = (xMax - xMin);
+	magYDiff = (yMax - yMin);
+	magZDiff = (zMax - zMin);
 
 	PRINTF("xMin %f\r\nyMin %f\r\nzMax %f\r\n", magXMin, magYMin, magZMin);
 	PRINTF("magXDiff %f yDiff: %f zDiff: %f\r\n", magXDiff, magYDiff, magZDiff);

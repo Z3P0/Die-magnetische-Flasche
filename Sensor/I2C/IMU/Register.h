@@ -137,7 +137,6 @@
 /*-----LSM303DLH-----*/
 #define LSM303_ADDRESS			0x1E
 #define LSM303DLH_OUT_ALL 		0x83
-#define LSM303DHL_WRITE			0x3C
 
 #define CRA_REG_M_ADDRESS 		0x00
 #define CRA_REG_M_VALUE 		0b00011000
@@ -172,6 +171,7 @@
 // CRA_REG_M
 // ---------------------------------
 // default									0000000
+// Continuous-conversion
 // MD1										0
 // MD2										0
 

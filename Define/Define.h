@@ -20,7 +20,7 @@
 #define int16Max		32768
 
 #define i2c_1_speed		400000
-
+//Nice feature :-)
 #define PROTOCOL_BINARY	false
 
 #endif /* DEFINE_H_ */

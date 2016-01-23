@@ -25,14 +25,14 @@ Hbridge flWheel(1000, 1000, &HBRIDGE_B, &HBRIDGE_B_INA, &HBRIDGE_B_INB);
 Hbridge irMotor(1000, 1000, &HBRIDGE_C, &HBRIDGE_C_INA, &HBRIDGE_C_INB);
 
 /* The solar thread gets a reverence to the thermal knife bridge*/
-ThSolar thSolar("Solar", &thKnife);
+//ThSolar thSolar("Solar", &thKnife);
 /* The IMU thread gets the reference to flywheel*/
 ThImuRead imuRead("IMURead", &flWheel);
 
 //IR sensor: gets reference to ADC
-IR irSensor(&ADC_1);
+//IR irSensor(&ADC_1);
 //Mission thread: gets reference to IR sensor
-ThMission thMission("Mission", &irSensor);
+// ThMission thMission("Mission", &irSensor);
 
 ThTelecommand::ThTelecommand(const char* name) {
 	cmd = value = 0;
@@ -246,7 +246,7 @@ void ThTelecommand::exectue() {
 
 	case (DEPL):
 		//No need for a extra print command!
-		thSolar.resume();
+		//thSolar.resume();
 		break;
 
 	case (FSUN):
@@ -270,7 +270,7 @@ void ThTelecommand::exectue() {
 		break;
 
 	case (IRSM):
-		irSensor.sample(value);
+		//irSensor.sample(value);
 		break;
 
 	default:

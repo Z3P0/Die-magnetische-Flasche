@@ -30,7 +30,7 @@ void ThSolar::run() {
 	int cnt = 0;
 	while (cnt++ < DEPLOY_TIME) {
 		suspendCallerUntil(NOW()+ 1*SECONDS);
-		PRINTF("%d\r\n", (DEPLOY_TIME - cnt));
+		PRINTF("Solar %d\r\n", (DEPLOY_TIME - cnt));
 	}
 	PRINTF("Solar array deployed.\r\n");
 	bridge->setDuty(0);
