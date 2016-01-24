@@ -19,10 +19,17 @@
 
 #define int16Max			32768
 
-#define i2c_1_speed			400000
-
-//Nice feature :-)
-#define PROTOCOL_BINARY		false
 #define SAMPLING_TIME		0.015
+#define i2c_1_speed		100000
+
+#define PROTOCOL_BINARY
+
+/*Camera */
+//#define CAM_DEBUG
+#define WIDTH 100
+#define HEIGHT 180
+#define IMAGESIZE (WIDTH*HEIGHT*2) //multiply by 2 because we use YUV
+#define YUV422
+#define CAMADR 0x21
 
 #endif /* DEFINE_H_ */

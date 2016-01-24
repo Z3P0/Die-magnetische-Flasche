@@ -16,6 +16,8 @@ I * ThTelecommand.cpp
 #include "../Sensor/ADC/IR.h"
 #include "../TCTM/SerializationUtil.h"
 #include <stdio.h>
+#include "../Sensor/OV7670/camera.h"
+#include "../Define/Define.h"
 
 
 // Threads objects
@@ -35,7 +37,8 @@ ThImuRead imuRead("IMURead", &flWheel);
 //IR sensor: gets reference to ADC
 //IR irSensor(&ADC_1);
 //Mission thread: gets reference to IR sensor
-// ThMission thMission("Mission", &irSensor);
+ThMission thMission("Mission", &irSensor, &irMotor);
+Camera cam;
 
 ThTelecommand::ThTelecommand(const char* name) {
 	cmd = value = 0;
@@ -70,7 +73,6 @@ void ThTelecommand::run_binary() {
 		switch (cmd) {
 		case TRAC:
 		case PONT:
-		case PICT:
 		case CTEP:
 		case CTKD:
 		case CTKI:
@@ -104,7 +106,7 @@ void ThTelecommand::run_text() {
 			uart_stdout.suspendUntilDataReady();
 			tmp = toUpperCase(uart_stdout.getcharNoWait());
 			out[i] = tmp;
-			if (tmp == '\n') {
+			if (tmp == '\n' || tmp == '\r') {
 				if (!nbr) {
 					out[i] = '\0';
 					cmd = utilization(out);
@@ -125,12 +127,23 @@ void ThTelecommand::run_text() {
 		exectue();
 	}
 }
+void delayx(int x)
+{
+	while(x-->0)
+	{asm("nop");}
+}
 
-void ThTelecommand::run() {
-	if (PROTOCOL_BINARY)
+void ThTelecommand::run()
+{
+	I2C_1.init();
+	cam.init();
+
+#ifdef PROTOCOL_BINARY
 		run_binary();
-	else
+#else
 		run_text();
+#endif
+
 }
 
 //Execute telecommand
@@ -254,7 +267,25 @@ void ThTelecommand::exectue() {
 		break;
 
 	case (PICT):
-		PRINTF("TC: TODO picture mode");
+		//PRINTF("TC: TODO picture mode");
+		cam.takePicture();
+
+#ifdef PROTOCOL_BINARY
+	PRINTF("%c", 0x00);
+	PRINTF("%c", 0x02);
+	char len[2];
+	SerializationUtil::WriteInt((int16_t)HEIGHT,len,0);
+	PRINTF("%c%c", len[0], len[1]);
+	SerializationUtil::WriteInt((int16_t)WIDTH,len,0);
+	PRINTF("%c%c", len[0], len[1]);
+#else
+	PRINTF("I");
+#endif
+		for(int j=0; j<HEIGHT*2;j++){
+			for(int i=0; i<WIDTH; i++)
+				PRINTF("%c",DCMI_Buffer[i+j*WIDTH]);
+			suspendCallerUntil(NOW()+5*MILLISECONDS);
+		}
 		break;
 
 	case (PONT):
@@ -266,7 +297,7 @@ void ThTelecommand::exectue() {
 		break;
 
 	case (MISSION):
-		//thMission.toggleMission();
+		thMission.toggleMission();
 		break;
 
 	case (IRSM):

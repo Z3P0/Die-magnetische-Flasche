@@ -10,12 +10,13 @@
 #include "../../Extern/Extern.h"
 #include "HALSCCB.h"
 #include "Dcmi.h"
-#include "Sccb.h";
 
 #include "stm32f4xx.h"
 #include "stm32f4xx_gpio.h"
 #include "stm32f4xx_rcc.h"
 #include "stm32f4xx_i2c.h"
+
+//#include "utility"
 
 uint8_t init_registers[][2]  = {
 		{0x3a, 0x04},
@@ -191,23 +192,15 @@ uint8_t init_registers[][2]  = {
 		{ 0xff, 0xff },
 };
 
-HAL_GPIO reset(GPIO_010);
-HAL_GPIO power(GPIO_033);
+HAL_GPIO reset(GPIO_010); //PA10
+HAL_GPIO power(GPIO_033); //PC1
 HAL_GPIO ledo(GPIO_061);
 HAL_SCCB sccb;
 
-#define PICTURE_WIDTH						160
-#define PICTURE_HEIGHT						121
-#define CAPTUREMODE					DCMI_CaptureMode_SnapShot
-#define FRAMERATE					DCMI_CaptureRate_All_Frame
-//#define CAPTUREMODE				DCMI_CaptureMode_Continuous
-//#define FRAMERATE					DCMI_CaptureRate_1of4_Frame
-#define DCMI_DR_ADDRESS      		0x50050028
-#define IMAGESIZE					(PICTURE_HEIGHT*PICTURE_WIDTH*2)
+
 uint8_t DCMI_Buffer[IMAGESIZE];
 
 Dcmi dcmi(IMAGESIZE, (uint32_t) DCMI_Buffer, FRAMERATE, CAPTUREMODE);
-//Sccb sccb;
 
 void delayx(unsigned int ms) {
 	//4694 = 1 ms
@@ -232,33 +225,43 @@ Camera::~Camera() {
 void Camera::init()
 {
 	PRINTF("starting cam init\n");
+
 	ledo.init(true);
 	reset.init(true);
 	power.init(true);
-	reset.setPins(1);
-	power.setPins(0);
+	reset.setPins(1);	//Cam reset passive(high)
+	power.setPins(0);	//Cam power up (low)
 	ledo.setPins(1);
 
-	PRINTF("Init GPIOs...");
-	dcmi.InitGPIO();
-	PRINTF("Done!\n");
-	PRINTF("Init DCMI...");
-	dcmi.InitDCMI();
-	PRINTF("Done!\n");
 	PRINTF("Init I2C...");
 	delayx(1000);
-	//sccb.I2CInit();
-	sccb.init();
+	//sccb.init();
 	PRINTF("Done!\n");
 	PRINTF("Init OV7670...");
 	delayx(1000);
-	initRegisters();
+	//initRegisters();
 	PRINTF("Done!\n");
+
+	delayx(1000);
+	PRINTF("Init GPIOs...");
+	dcmi.InitGPIO();
+	PRINTF("Done!\n");
+	delayx(1000);
+	PRINTF("Init DCMI...");
+	dcmi.InitDCMI();
+	PRINTF("Done!\n");
+
 	PRINTF("Enable DCMI...");
 	delayx(1000);
 	dcmi.EnableDCMI();
 
 	PRINTF("Done with cam init!\n");
+
+	//for(int us=0; us<5000000; us++) asm("nop");
+
+//	suspendCallerUntil(NOW() + 5000*MILLISECONDS);
+	for(int i = 0; i< IMAGESIZE; i++)
+		printf("%d \r\n", DCMI_Buffer[i]);
 }
 
 void Camera::initTimer(){
@@ -284,26 +287,21 @@ void Camera::initTimer(){
 
 void Camera::initRegisters()
 {
-	PRINTF("starting InitOV7670 init\n");
+	//PRINTF("starting InitOV7670 init\n");
 	uint16_t x = 0;
 	int res = 0;
 	res = sccb.write_reg(0x12, 0x80);
 	res = sccb.write_reg(0x12, 0x00);
-	//res = sccb.ov7670_set(0x12, 0x80);
-	//res = sccb.ov7670_set(0x12, 0x00);
 
 	while (init_registers[x][0] != 0xFF && init_registers[x][1] != 0xFF) {
 		PRINTF("init register: status x=%d\n", x);
 
 		res = sccb.write_reg((unsigned char) init_registers[x][0], (unsigned char) init_registers[x][1]);
 		uint8_t read = sccb.read_reg((unsigned char) init_registers[x][0]);
-		//res = sccb.ov7670_set((unsigned char) init_registers[x][0], (unsigned char) init_registers[x][1]);
-		//uint8_t read = sccb.ov7670_get((unsigned char) init_registers[x][0]);
-		PRINTF("SCCB Init %d: reg 0x%x = 0x%x = 0x%x \n", x,
-				init_registers[x][0], init_registers[x][1], read);
-		if (res) {
-			PRINTF("ERROR I2C %d\n", res);
-		}
+		PRINTF("SCCB Init %d: reg 0x%x = 0x%x = 0x%x \n", x, init_registers[x][0], init_registers[x][1], read);
+//		if (res) {
+//			PRINTF("ERROR I2C %d\n", res);
+//		}
 		x++;
 	}
 }

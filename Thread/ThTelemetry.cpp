@@ -16,7 +16,7 @@ ThTelemetry::ThTelemetry(const char* name) {}
 ThTelemetry::~ThTelemetry() {}
 
 void ThTelemetry::init(){
-	bluetooth_uart.init(115200);
+	//bluetooth_uart.init(115200);
 	BlueLED.init(true,1,1);
 }
 
@@ -36,6 +36,16 @@ void ThTelemetry:: run(){
 	TelemetryPacket tmp;*/
 
 	TIME_LOOP(NOW(), 1*SECONDS){
+//		PRINTF("%c%c",0x00,0x01); 	//Telemetry packet 0x0001
+//		PRINTF("%c%c",0x00,0x00); 	// roll
+//		PRINTF("%c%c",0x00,0x00);	//pitch
+//		PRINTF("%c%c",0x00,0x00);	//yaw
+//		PRINTF("%c%c",0x00,0x00);	//Battery volt
+//		PRINTF("%c%c",0x00,0x00);	//Battery current
+//		PRINTF("%c%c",0x00,0x00);	//Panal volt
+//		PRINTF("%c%c",0x00,0x00);	//Panal current
+//		PRINTF("%c%c",0x00,0x00);	//Light sensor value
+//		PRINTF("%c%c",0x00,0x00);	//Operation mode
 		/*
 		imu.accRead();
 		imu.gyrRead();
@@ -65,6 +75,7 @@ void ThTelemetry:: run(){
 
 
 		}*/
+
 		BlueLED.setPins(~BlueLED.readPins());
 		//bluetooth_uart.write("Alive\r\n", sizeof("Alive\r\n"));
 

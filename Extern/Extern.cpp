@@ -7,10 +7,8 @@
 
 #include "Extern.h"
 
-
-
 /* Communication UART*/
-HAL_UART bluetooth_uart(UART_IDX2);
+//HAL_UART bluetooth_uart(UART_IDX2);
 
 /* Blue LED - the last that is not effected by the H-bridge*/
 HAL_GPIO BlueLED(GPIO_063);
@@ -41,4 +39,10 @@ HAL_GPIO HBRIDGE_C_INB(GPIO_074);
 /* ADC*/
 HAL_ADC ADC_1(ADC_IDX2);
 
+HAL_UART BT(UART_IDX2);
 
+/*I2C 1, used for camera etc*/
+HAL_I2C I2C_1(I2C_IDX1);
+
+/*DCMI buffer*/
+uint8_t DCMI_Buffer[HEIGHT*WIDTH * 2];

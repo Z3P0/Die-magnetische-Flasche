@@ -8,6 +8,7 @@
 #ifndef EXTERN_H_
 #define EXTERN_H_
 #include "Include.h"
+#include "../Define/Define.h"
 
 /* Communication UART*/
 extern HAL_UART bluetooth_uart;
@@ -38,6 +39,11 @@ extern HAL_GPIO HBRIDGE_C_INB;
 
 extern HAL_ADC ADC_1;
 
+extern HAL_UART BT;
+
+extern HAL_I2C I2C_1;
+
+extern uint8_t DCMI_Buffer[HEIGHT*WIDTH * 2];
 
 
 #endif /* EXTERN_H_ */

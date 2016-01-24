@@ -33,19 +33,13 @@ public:
 	void setDuty(int value);
 
 	/* Special functions for the IR Motor*/
-	void moveUp(){
-		setDuty(-increments);
-	}
+	void moveUp();
 
 	/* Special functions for the IR Motor*/
-	void moveDown(){
-		setDuty(increments);
-	}
+	void moveDown();
 
 	/* Special functions for the IR Motor*/
-	void stop(){
-		setDuty(0);
-	}
+	void stop();
 
 	/*Change of the frequency and th increment value
 	 selection of the Hbridge by the enum 'Select'*/

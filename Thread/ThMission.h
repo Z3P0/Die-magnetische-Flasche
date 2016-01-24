@@ -9,10 +9,11 @@
 #define THREAD_THMISSION_H_
 #include "../Extern/Include.h"
 #include "../Sensor/ADC/IR.h"
+#include "../Actuators/Hbridge.h"
 
 class ThMission: public Thread{
 public:
-	ThMission(const char* name, IR* irSensor);
+	ThMission(const char* name, IR* irSensor, Hbridge* irMotor);
 	virtual ~ThMission();
 	void init();
 	void run();
@@ -21,6 +22,7 @@ public:
 private:
 	bool missionMode;
 	IR* irSensor;
+	Hbridge* irMotor;
 };
 
 #endif /* THREAD_THMISSION_H_ */

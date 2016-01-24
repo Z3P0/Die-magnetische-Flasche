@@ -6,6 +6,8 @@
  */
 
 #include "Dcmi.h"
+#include "stm32f4xx_dcmi.h"
+
 
 Dcmi::Dcmi(uint32_t imageSize, uint32_t dmaMemoryAddress, uint16_t captureRate, uint16_t captureMode) {
 	imgSize = imageSize;
@@ -71,6 +73,7 @@ void Dcmi::InitGPIO() {
 				| GPIO_Pin_5 | GPIO_Pin_6;
 		GPIO_Init(GPIOE, &GPIO_InitStructure);
 
+
 		RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
 
 		GPIO_PinAFConfig(GPIOA, GPIO_PinSource8, GPIO_AF_MCO );
@@ -83,6 +86,9 @@ void Dcmi::InitGPIO() {
 		GPIO_Init(GPIOA, &GPIO_InitStructure);
 
 		RCC_MCO1Config(RCC_MCO1Source_HSI, RCC_MCO1Div_1);
+
+
+
 	//	RCC_MCO1Config(RCC_MCO1Source_HSI, RCC_MCO1Div_2);
 	//	RCC_MCO1Config(RCC_MCO1Source_PLLCLK, RCC_MCO1Div_4);
 	}
@@ -95,9 +101,28 @@ void Dcmi::InitDCMI() {
 	NVIC_InitTypeDef NVIC_InitStructure;
 	DCMI_CROPInitTypeDef DCMI_CROPInitStructure;
 
+//    NVIC_InitStructure.NVIC_IRQChannel = DMA2_Stream1_IRQn;
+//    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+//    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+//    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+//    NVIC_Init(&NVIC_InitStructure);
+
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
+    NVIC_InitStructure.NVIC_IRQChannel = DCMI_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
+
+
 	/*** Configures the DCMI to interface with the OV7670 camera module ***/
 	/* Enable DCMI clock */
 	RCC_AHB2PeriphClockCmd(RCC_AHB2Periph_DCMI, ENABLE);
+
+	/* Enable DMA2 clock */
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA2, ENABLE);
+
+
 	DCMI_DeInit();
 	/* DCMI configuration */
 	DCMI_InitStructure.DCMI_CaptureMode = captMode; //snapshot
@@ -108,9 +133,17 @@ void Dcmi::InitDCMI() {
 	DCMI_InitStructure.DCMI_CaptureRate = captRate;
 	DCMI_InitStructure.DCMI_ExtendedDataMode = DCMI_ExtendedDataMode_8b;
 
+	DCMI_CROPInitStructure.DCMI_VerticalStartLine = 0x00;
+	DCMI_CROPInitStructure.DCMI_VerticalLineCount = PICTURE_HEIGHT-1;
+	DCMI_CROPInitStructure.DCMI_HorizontalOffsetCount = 0x00;
+	DCMI_CROPInitStructure.DCMI_CaptureCount = PICTURE_WIDTH-1;
+
+	/* DCMI configuration */
+	DCMI_Init(&DCMI_InitStructure);
+	DCMI_CROPConfig(&DCMI_CROPInitStructure);
+
+
 	/* Configures the DMA2 to transfer Data from DCMI */
-	/* Enable DMA2 clock */
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA2, ENABLE);
 
 	/* DMA2 Stream1 Configuration */
 	DMA_DeInit(DMA2_Stream1);
@@ -131,27 +164,11 @@ void Dcmi::InitDCMI() {
 	DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
 	DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
 
-	/* DCMI configuration */
-	DCMI_Init(&DCMI_InitStructure);
-
 	/* DMA2 IRQ channel Configuration */
 	DMA_Init(DMA2_Stream1, &DMA_InitStructure);
 
     DMA_ITConfig(DMA2_Stream1, DMA_IT_TC, ENABLE);
     DMA_ITConfig(DMA2_Stream1, DMA_IT_TE, ENABLE);
-
-    NVIC_InitStructure.NVIC_IRQChannel = DMA2_Stream1_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
-
-    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
-    NVIC_InitStructure.NVIC_IRQChannel = DCMI_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
 
 
 
@@ -164,9 +181,17 @@ void Dcmi::EnableDCMI(){
     DCMI_ITConfig(DCMI_IT_FRAME, ENABLE);
     DCMI_ITConfig(DCMI_IT_OVF, ENABLE);
     DCMI_ITConfig(DCMI_IT_ERR, ENABLE);
+
+    DCMI_CROPCmd(ENABLE);
 	DMA_Cmd(DMA2_Stream1, ENABLE);
 	DCMI_Cmd(ENABLE);
 	DCMI_CaptureCmd(ENABLE);
+}
+
+void Dcmi::delay(int ns)
+{
+  	for(int i=0; i<ns;i++)
+  		asm("nop");
 }
 
 

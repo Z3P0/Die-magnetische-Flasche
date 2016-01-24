@@ -32,6 +32,19 @@ void Hbridge::init() {
 	socket->write(0);
 }
 
+void Hbridge::moveUp()
+{
+	setDuty(-increments);
+}
+
+void Hbridge::moveDown(){
+	setDuty(increments);
+}
+
+void Hbridge::stop(){
+	setDuty(0);
+}
+
 void Hbridge::setDuty(int duty) {
 
 	/*Changes the polarity of the pins in case:

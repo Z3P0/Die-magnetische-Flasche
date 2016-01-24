@@ -16,6 +16,9 @@
 
 #include "stm_misc.h"
 
+#include "../../Define/Define.h"
+
+
 class Dcmi {
 private:
 	uint32_t imgSize;
@@ -25,9 +28,12 @@ private:
 public:
 	Dcmi(uint32_t imageSize, uint32_t dmaMemoryAddress, uint16_t captureRate, uint16_t captureMode);
 	void InitDCMI();
+	void InitDCMI2();
 	void InitGPIO();
 	void EnableDCMI();
+	void EnableDCMI2();
 	void DisableDCMI();
+	void delay(int ns);
 };
 
 #endif /* PERIPHERAL_DCMI_H_ */

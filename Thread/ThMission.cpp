@@ -6,11 +6,13 @@
  */
 
 #include "ThMission.h"
-//#include "../Sensor/Camera/Camera.h"
+#include "../Sensor/Camera/Camera.h"
+
 //Camera cam;
-ThMission::ThMission(const char* name, IR* ir) {
+ThMission::ThMission(const char* name, IR* ir, Hbridge* irmtr) {
 	irSensor = ir;
 	missionMode = false;
+	irMotor = irmtr;
 }
 
 ThMission::~ThMission() {
@@ -20,25 +22,37 @@ void ThMission::init(){
 
 }
 void ThMission::run(){
+	static bool sensorOnTop = false;
 	irSensor->init();
-	//cam.init();
 	while(1)
 	{
-		while(missionMode)
+		suspendCallerUntil();
+		//cam.init();
+		int64_t mission_start = NOW();
+		if(sensorOnTop)
+			irMotor->moveDown();
+		else
+			irMotor->moveUp();
+
+		//while(missionMode)
+		while(true)
 		{
-
-			//float v = ((float)ir)/839;
-			//float dist = 2.435 *v*v + 29.75 - 14.98*v;
-			//irSensor->read();
 			PRINTF("Distance (cm): %f\r\n", irSensor->read());
-			suspendCallerUntil(NOW() + 1*SECONDS);
-		}
-		suspendCallerUntil(NOW() + 2*SECONDS);
-	}
 
+			//Measurement every 50ms
+			suspendCallerUntil(NOW() + 50*MILLISECONDS);
+			if(NOW() - mission_start > SECONDS * 55)
+				break;
+		}
+		irMotor->stop();
+		sensorOnTop = !sensorOnTop;
+		suspendCallerUntil(NOW() + 2*SECONDS);
+		PRINTF("MISSION COMPLETED\r\n");
+	}
 }
 
 void ThMission::toggleMission()
 {
-	missionMode = !missionMode;
+	PRINTF("Starting MISSION\r\n");
+	resume();
 }
