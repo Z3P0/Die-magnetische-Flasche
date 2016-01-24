@@ -10,7 +10,7 @@
 #include "../../../Extern/Extern.h"
 
 
-Light::Light(HAL_I2C *i2c) {
+Light::Light() {
 	init();
 }
 
@@ -20,7 +20,7 @@ void Light::init() {
 	PRINTF("Configuring light sensor\r\n");
 
 	//Powers the light sensors up
-	i2c->write(lightAdress, lightCtrlReg, 2);
+	I2C_1.write(lightAdress, lightCtrlReg, 2);
 }
 
 /*
@@ -30,12 +30,12 @@ void Light::init() {
  */
 uint8_t Light::read() {
 	uint8_t data[2];
-	if(i2c->writeRead(lightAdress, CHANNEL_0_LOW, 1, data, 2) != 2)
+	if(I2C_1.writeRead(lightAdress, CHANNEL_0_LOW, 1, data, 2) != 2)
 		return -1;
 
 	ch0 = ((int16_t) ((data[1] << 8) | data[0]));
 
-	if(i2c->writeRead(lightAdress, CHANNEL_1_LOW, 1, data, 2) != 2)
+	if(I2C_1.writeRead(lightAdress, CHANNEL_1_LOW, 1, data, 2) != 2)
 		return -1;
 
 	ch1 = ((int16_t) ((data[1] << 8) | data[0]));

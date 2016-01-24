@@ -15,11 +15,9 @@ HAL_GPIO I2C_2_EN(GPIO_055);
 HAL_GPIO CS_XM(GPIO_032);     // Chip select Accelerometer and Magnetometer
 HAL_I2C I2C_2(I2C_IDX2);
 
-
 IMU::IMU(Thread *caller, float sampleRate) {
 	// Reference to the caller thread to suspend it
 	this->caller = caller;
-
 
 	// Sample rate for integration of the values from the Gyroscope
 	this->sampleRate = sampleRate;
@@ -42,13 +40,12 @@ IMU::~IMU() {
 }
 
 void IMU::configurateIMU() {
-
 	// Chip select
 	CS_XM.init(true, 1, 1);
 	CS_G.init(true, 1, 1);
 
 	// Enable I2C_2
-	I2C_2_EN.init(true, 1, 1);
+	I2C_2.init(400000);
 
 	// Initialize the gyroscope
 	errorDetection(I2C_2.write(gyrAdress, gyrCtrlReg1, 2), 2);
@@ -63,16 +60,16 @@ void IMU::configurateIMU() {
 	errorDetection(I2C_2.write(accMagAdress, accMagCtrlReg7, 2), 2);
 
 	// Initialize the accelerometer and the magnetometer LSM303DLH
-//	errorDetection(I2C_2.write(magAdressLSM303, crAReg, 2), 2);
-//	errorDetection(I2C_2.write(magAdressLSM303, crBReg, 2), 2);
-//	errorDetection(I2C_2.write(magAdressLSM303, mrReg, 2), 2);
+	errorDetection(I2C_2.write(magAdressLSM303, crAReg, 2), 2);
+	errorDetection(I2C_2.write(magAdressLSM303, crBReg, 2), 2);
+	errorDetection(I2C_2.write(magAdressLSM303, mrReg, 2), 2);
 }
 
 /* Checks if if there is a I2C_2 read error by comparing the written with  the expected number of bytes.*/
 void IMU::errorDetection(int16_t nbrOfReceivedBytes, int8_t expectedNumber) {
 	if (nbrOfReceivedBytes != expectedNumber) {
 		PRINTF("ERROR - I2C_2\n number of bytes: %d expected %d\r\n", expectedNumber, nbrOfReceivedBytes);
-		resetI2C();
+		//resetI2C();
 	}
 }
 
@@ -81,11 +78,8 @@ void IMU::resetI2C() {
 	I2C_2.reset();
 	caller->suspendCallerUntil(NOW()+ 5*MILLISECONDS);
 	I2C_2.init(400000);
-	I2C_2_EN.setPins(0);
 	PRINTF("RESET I2C!\r\n");
 	caller->suspendCallerUntil(NOW()+ 5*MILLISECONDS);
-	I2C_2_EN.setPins(1);
-	I2C_2_EN.init(true, 1, 1);
 	configurateIMU();
 }
 
@@ -117,7 +111,6 @@ void IMU::accCalibrate() {
 
 	PRINTF("Accelerometer calibration finished. xOffset: %f yOffset: %f zOffset: %f\r\n", accXOff, accYOff, accZOff);
 }
-
 
 /* Calibration of an axis. n samples for every axis / n - 1000 = Offset*/
 void IMU::accAxisOffset(float &axisValue, float &axisOffset, char name) {
@@ -238,9 +231,9 @@ void IMU::magReadLSM303DLH() {
 	uint8_t data[6];
 	errorDetection(I2C_2.writeRead(magAdressLSM303, outAllAxisLSM303, 1, data, 6), 6);
 
-	mag.x = ((int16_t) (((data[0] << 8) | data[1]) - magXMin / magXDiff) * 2 - 1);
-	mag.y = ((int16_t) (((data[2] << 8) | data[3]) - magYMin / magYDiff) * 2 - 1);
-	mag.z = ((int16_t) (((data[4] << 8) | data[5]) - magZMin / magZDiff) * 2 - 1);
+	mag.x = ((((int16_t) (((data[0] << 8) | data[1])) - magXMin) / magXDiff) * 2 - 1);
+	mag.y = ((((int16_t) (((data[2] << 8) | data[3])) - magYMin) / magYDiff) * 2 - 1);
+	mag.z = ((((int16_t) (((data[4] << 8) | data[5])) - magZMin) / magZDiff) * 2 - 1);
 }
 
 /*
@@ -280,7 +273,7 @@ void IMU::magCalibrate() {
 		if (cnt % 100 == 0) {
 			PRINTF("-------------\r\nxMin %d xMax %d\r\nyMin %d yMax %d\r\nzMin %d zMax %d\r\n", (int) (xMin * LSM303_MAG_GAIN_XY), (int) (xMax * LSM303_MAG_GAIN_XY),
 					(int) (yMin * LSM303_MAG_GAIN_XY), (int) (yMax * LSM303_MAG_GAIN_XY), (int) (zMin * LSM303_MAG_GAIN_Z), (int) (zMax * LSM303_MAG_GAIN_Z));
-			//((PRINTF("x:%d\r\ny:%d\r\nz:%d\r\n", tmpX, tmpY, tmpZ);
+			PRINTF("x:%d\r\ny:%d\r\nz:%d\r\n", tmpX, tmpY, tmpZ);
 			PRINTF("-----------------------\r\n");
 		}
 		caller->suspendCallerUntil(NOW()+ 10*MILLISECONDS);

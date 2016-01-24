@@ -34,7 +34,7 @@
 
 class Light {
 public:
-	Light(HAL_I2C *i2c);
+	Light();
 	virtual ~Light();
 	/*
 	 * The silicon detectors respond strongly to the IR light that is invisible for the human eye.

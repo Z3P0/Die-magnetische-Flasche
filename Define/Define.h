@@ -22,7 +22,7 @@
 #define SAMPLING_TIME		0.015
 #define i2c_1_speed		100000
 
-#define PROTOCOL_BINARY
+//#define PROTOCOL_BINARY
 
 /*Camera */
 //#define CAM_DEBUG

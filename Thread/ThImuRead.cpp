@@ -18,6 +18,9 @@
 ThImuRead::ThImuRead(const char* name, Hbridge *flWheel) {
 	// Read the battery values
 	// Current batteries(ADDR_BATT);
+
+
+	//Light ls;
 	float batVal[2];
 
 	// Reference to the H-Bridge
@@ -36,7 +39,7 @@ ThImuRead::ThImuRead(const char* name, Hbridge *flWheel) {
 	value = 0;				// Default value used for the TC
 
 	send = true;     		// Sending continuously values to the GS
-	gyrCalFlag = true;     	// Gyroscope calibration by default enabled
+	gyrCalFlag = false;     	// Gyroscope calibration by default enabled
 
 	motorCtrl = false;
 	setPointFlag = false;
@@ -127,10 +130,9 @@ void ThImuRead::run() {
 
 		// Inner read loop
 		while (1) {
-			PRINTF("Read I \r\n");
 			imu.accRead();
 			imu.gyrRead();
-			//imu.magReadLSM303DLH();
+			imu.magReadLSM303DLH();
 
 			ahrs.filterUpdate2(&imu.acc, &imu.gyr, &imu.mag);
 
@@ -140,10 +142,18 @@ void ThImuRead::run() {
 			// input value is just the gyro dz value!
 			duty = controller.pid(setPoint, ahrs.gY);
 
+
 			if ((cnt++ > 22) && (send)) {
 				cnt = 0;
 
 				char out[80];
+
+				sprintf(out, "MAG raw %d %d %.d\r\n", (int)imu.mag.x,(int)imu.mag.y,(int)imu.mag.z);
+				PRINTF(out);
+
+
+				//sprintf(out, "xl %d xh %d  yl %d yh %d zl %d xh %d \r\n", imu.xlow, imu.xhigh, imu.ylow, imu.yhigh, imu.zlow, imu.zhigh);
+				//PRINTF(out);
 
 				sprintf(out, "AM r:%.1f p:%.1f y:%.1f\r\n", imu.acc.r, imu.acc.p, ahrs.mY);
 				PRINTF(out);

@@ -41,7 +41,7 @@ HAL_ADC ADC_1(ADC_IDX2);
 
 HAL_UART BT(UART_IDX2);
 
-/*I2C 1, used for camera etc*/
+/*I2C 1, used for camera, light-sensors*/
 HAL_I2C I2C_1(I2C_IDX1);
 
 /*DCMI buffer*/
