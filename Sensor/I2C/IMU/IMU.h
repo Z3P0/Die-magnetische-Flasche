@@ -70,7 +70,8 @@ public:
 	IMU_Gyro gyr;
 	IMU_Mag mag;
 
-	IMU(Thread* caller, float sampleRate);
+	// All Initial Measurement units are connected to i2c1
+	IMU(Thread *caller, float sampleRate);
 	virtual ~IMU();
 	void errorDetection(int16_t nbrOfReceivedBytes, int8_t expectedNumber);
 	void resetValues();
@@ -82,6 +83,8 @@ public:
 
 	// Gyroscope
 	void gyrRead();
+	void integration();
+	void eulerConvertion();
 	void gyrCalibrate();
 
 	// Magnetometer
@@ -91,7 +94,9 @@ public:
 	void magSetDefaultValues();
 
 private:
+	// Reference to the objects that are used in this class and deliver by the constructor
 	Thread *caller;
+	HAL_I2C *i2c;
 
 	void configurateIMU();
 	void resetI2C();

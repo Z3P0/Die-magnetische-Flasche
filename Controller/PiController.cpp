@@ -8,7 +8,7 @@
 #include "PiController.h"
 
 PiController::PiController() {
-	dt = 0.01;     				// Sampling time of the control function
+	dt = SAMPLING_TIME;     	// Sampling time of the control function
 	kp = KP;
 	ki = KI;
 	kd = KD;
@@ -27,9 +27,10 @@ PiController::PiController() {
 PiController::~PiController() {
 }
 
-//this function implements the PI control required to control the velocity of the satellite
-//it outputs the duty cycle to be applied to the pwm
-//parameters= 1)setpoint=desired speed 2)actual= speed from gyro
+// This function implements the PI-control required to control the velocity of
+// the satellite it outputs the duty cycle to be applied to the PWM
+// @parameters setpoint =desired speed
+// @parameters actual= speed from Gyroscope
 unsigned int PiController::pi(float setpoint, float actual) {
 
 	//Calculate PID
@@ -59,15 +60,16 @@ unsigned int PiController::pi(float setpoint, float actual) {
 	return ((output / V_MAX) * PWM_RES);
 }
 
-//this function implements the PI control required to control the velocity of the satellite
-//it outputs the duty cycle to be applied to the pwm
-//parameters= 1)setpoint=desired speed 2)actual= speed from gyro
+// This function implements the PI control required to control the velocity of
+// the satellite it outputs the duty cycle to be applied to the PWM
+// @parameters setpoint =desired speed
+// @parameters actual= speed from Gyroscope
 int32_t PiController::pid(float setpoint, float actual) {
 
 	//Calculate PID
 	error = setpoint - actual;
 
-	//In case error is too small then stop integration
+	// In case error is too small then stop integration
 	if (ABS(error) > epsilon)
 		integral = integral + error * dt;
 
@@ -78,15 +80,15 @@ int32_t PiController::pid(float setpoint, float actual) {
 	output = kp * error + ki * integral + kd * derivative;
 
 
-	//from angular velocity to voltage
-	//output = ABS(output);
+	// From angular velocity to voltage
+	// output = ABS(output);
 
-	//Saturation filter
+	// Saturation filter
 	if (output > V_MAX)
 		output = V_MAX;
 	else if (output < -V_MAX)
 		output = -V_MAX;
 
-	//duty cycle
+	// Duty cycle
 	return (output *factor);
 }

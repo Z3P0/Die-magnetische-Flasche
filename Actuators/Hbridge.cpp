@@ -23,9 +23,7 @@ Hbridge::~Hbridge() {
 }
 
 void Hbridge::init() {
-
 	socket->init(frequency, increments);
-
 	HBRIDGE_EN.init(true, 1, 1);
 
 	inA->init(true, 1, 1);

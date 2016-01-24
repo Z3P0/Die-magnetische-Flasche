@@ -9,10 +9,6 @@
 #define EXTERN_H_
 #include "Include.h"
 
-/* I2C 1 - user for the light and the current sensors.*/
-extern HAL_GPIO I2C_EN;
-extern HAL_I2C I2C_1;
-
 /* Communication UART*/
 extern HAL_UART bluetooth_uart;
 
@@ -24,19 +20,19 @@ extern HAL_GPIO HBRIDGE_EN;
 
 /* H Bridge A*/
 extern HAL_PWM  HBRIDGE_A;
-/* Inputs*/
+//---Inputs
 extern HAL_GPIO HBRIDGE_A_INA;
 extern HAL_GPIO HBRIDGE_A_INB;
 
 /* H Bridge B*/
 extern HAL_PWM HBRIDGE_B;
-/* Inputs*/
+//---Inputs
 extern HAL_GPIO HBRIDGE_B_INA;
 extern HAL_GPIO HBRIDGE_B_INB;
 
 /* H Bridge C*/
 extern HAL_PWM HBRIDGE_C;
-/* Inputs*/
+//---Inputs
 extern HAL_GPIO HBRIDGE_C_INA;
 extern HAL_GPIO HBRIDGE_C_INB;
 

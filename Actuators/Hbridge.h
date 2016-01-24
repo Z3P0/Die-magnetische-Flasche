@@ -57,7 +57,7 @@ private:
 	HAL_PWM *socket;
 	HAL_GPIO *inA;
 	HAL_GPIO *inB;
-	bool clockwise; //changes the spinning direction respectively the polarity of the ports
+	bool clockwise; // Changes the spinning direction respectively the polarity of the ports
 
 };
 

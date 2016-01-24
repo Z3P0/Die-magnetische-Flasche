@@ -1,5 +1,5 @@
 /*
- * IMU.cpp
+ * I2C_2.cpp
  *
  *  Created on: 22.12.2015
  *      Author: pinker
@@ -10,13 +10,16 @@
 #include "../../../Extern/Extern.h"
 
 /*HAL*/
-HAL_GPIO CS_XM(GPIO_032);     // Chip select Accelerometer and Magnetometer
 HAL_GPIO CS_G(GPIO_018);	  // Chip select Gyroscope
+HAL_GPIO I2C_2_EN(GPIO_055);
+HAL_GPIO CS_XM(GPIO_032);     // Chip select Accelerometer and Magnetometer
 HAL_I2C I2C_2(I2C_IDX2);
+
 
 IMU::IMU(Thread *caller, float sampleRate) {
 	// Reference to the caller thread to suspend it
 	this->caller = caller;
+
 
 	// Sample rate for integration of the values from the Gyroscope
 	this->sampleRate = sampleRate;
@@ -40,50 +43,49 @@ IMU::~IMU() {
 
 void IMU::configurateIMU() {
 
-	//Chip select
+	// Chip select
 	CS_XM.init(true, 1, 1);
 	CS_G.init(true, 1, 1);
 
-	//enable IMU
-	I2C_EN.init(true, 1, 1);
-	I2C_2.init(400000);
+	// Enable I2C_2
+	I2C_2_EN.init(true, 1, 1);
 
-	//Initialize the gyroscope
+	// Initialize the gyroscope
 	errorDetection(I2C_2.write(gyrAdress, gyrCtrlReg1, 2), 2);
 	errorDetection(I2C_2.write(gyrAdress, gyrCtrlReg4, 2), 2);
 	errorDetection(I2C_2.write(gyrAdress, gyrCtrlReg5, 2), 2);
 
-	//Initialize the accelerometer and the magnetometer LSM9DS0
+	// Initialize the accelerometer and the magnetometer LSM9DS0
 	errorDetection(I2C_2.write(accMagAdress, accMagCtrlReg1, 2), 2);
 	errorDetection(I2C_2.write(accMagAdress, accMagCtrlReg2, 2), 2);
 	errorDetection(I2C_2.write(accMagAdress, accMagCtrlReg5, 2), 2);
 	errorDetection(I2C_2.write(accMagAdress, accMagCtrlReg6, 2), 2);
 	errorDetection(I2C_2.write(accMagAdress, accMagCtrlReg7, 2), 2);
 
-	//Initialize the accelerometer and the magnetometer LSM303DLH
-	errorDetection(I2C_2.write(magAdressLSM303, crAReg, 2), 2);
-	errorDetection(I2C_2.write(magAdressLSM303, crBReg, 2), 2);
-	errorDetection(I2C_2.write(magAdressLSM303, mrReg, 2), 2);
+	// Initialize the accelerometer and the magnetometer LSM303DLH
+//	errorDetection(I2C_2.write(magAdressLSM303, crAReg, 2), 2);
+//	errorDetection(I2C_2.write(magAdressLSM303, crBReg, 2), 2);
+//	errorDetection(I2C_2.write(magAdressLSM303, mrReg, 2), 2);
 }
 
-/*Checks if if there is a IMU read error by comparing the written with  the expected number of bytes.*/
+/* Checks if if there is a I2C_2 read error by comparing the written with  the expected number of bytes.*/
 void IMU::errorDetection(int16_t nbrOfReceivedBytes, int8_t expectedNumber) {
 	if (nbrOfReceivedBytes != expectedNumber) {
-		PRINTF("ERROR - IMU\n number of bytes: %d expected %d\r\n", expectedNumber, nbrOfReceivedBytes);
+		PRINTF("ERROR - I2C_2\n number of bytes: %d expected %d\r\n", expectedNumber, nbrOfReceivedBytes);
 		resetI2C();
 	}
 }
 
-/*Resets the I2C if there is an error.*/
+/* Resets the I2C if there is an error.*/
 void IMU::resetI2C() {
 	I2C_2.reset();
 	caller->suspendCallerUntil(NOW()+ 5*MILLISECONDS);
 	I2C_2.init(400000);
-	I2C_EN.setPins(0);
+	I2C_2_EN.setPins(0);
 	PRINTF("RESET I2C!\r\n");
 	caller->suspendCallerUntil(NOW()+ 5*MILLISECONDS);
-	I2C_EN.setPins(1);
-	I2C_EN.init(true, 1, 1);
+	I2C_2_EN.setPins(1);
+	I2C_2_EN.init(true, 1, 1);
 	configurateIMU();
 }
 
@@ -95,10 +97,9 @@ void IMU::accRead() {
 	acc.y = ((int16_t) ((data[3] << 8) | data[2])) * ACC_SCALING_FACTOR - accYOff;
 	acc.z = ((int16_t) ((data[5] << 8) | data[4])) * ACC_SCALING_FACTOR - accZOff;
 
-	//Accelerometer: Roll, pitch angle
+	// Accelerometer: Roll, pitch angle
 	acc.r = -atan2((double) acc.x, sqrt((double) (acc.y * acc.y + acc.z * acc.z))) * RAD_TO_DEG;
 	acc.p = atan2((double) acc.y, sqrt((double) (acc.x * acc.x + acc.z * acc.z))) * RAD_TO_DEG;
-
 }
 
 void IMU::accSetDefaultValues() {
@@ -107,7 +108,7 @@ void IMU::accSetDefaultValues() {
 	accZOff = ACC_Z_OFFSET;
 }
 
-/*Finds the offset value for every axis by the distance to the maxim values to 1000.*/
+/* Finds the offset value for every axis by the distance to the maxim values to 1000.*/
 void IMU::accCalibrate() {
 	PRINTF("Accelerometer calibration started...\r\n");
 	accAxisOffset(acc.x, accXOff, 'X');
@@ -117,15 +118,14 @@ void IMU::accCalibrate() {
 	PRINTF("Accelerometer calibration finished. xOffset: %f yOffset: %f zOffset: %f\r\n", accXOff, accYOff, accZOff);
 }
 
-/*
- * Calibration of an axis. n samples for every axis / n - 1000 = Offset
- */
+
+/* Calibration of an axis. n samples for every axis / n - 1000 = Offset*/
 void IMU::accAxisOffset(float &axisValue, float &axisOffset, char name) {
 
 	axisOffset = 0;
 	uint16_t cnt = 0;
 
-	//Display the value until the axis value is bigger than the value (850)
+	// Display the value until the axis value is bigger than the value (850)
 	while (1) {
 		PRINTF("Put the board in the direction so that the %c-axis is MAX.\r\n", name);
 		accRead();
@@ -142,7 +142,7 @@ void IMU::accAxisOffset(float &axisValue, float &axisOffset, char name) {
 	int16_t offset = 0;
 	cnt = 0;
 
-	//Taking samples to calculate the offset
+	// Taking samples to calculate the offset
 	while (cnt++ < ACC_NBR_SCALE_SAMPLES) {
 		accRead();
 		offset += (axisValue - 1000);
@@ -163,10 +163,36 @@ void IMU::gyrRead() {
 	gyr.dy = (((int16_t) ((data[3] << 8) | data[2])) * GYR_SCALING_FACTOR - gyrDyOff);
 	gyr.dz = (((int16_t) ((data[5] << 8) | data[4])) * GYR_SCALING_FACTOR - gyrDzOff);
 
+	//simple integration
+	integration();
+
+	//integration with euler angles
+	//eulerConvertion();
+}
+
+void IMU::integration() {
 	// Roll, pitch, yaw
 	gyr.r += (gyr.dy * sampleRate);
 	gyr.p += (gyr.dx * sampleRate);
 	gyr.y += (gyr.dz * sampleRate);
+}
+
+void IMU::eulerConvertion() {
+	float sinRoll = sinf(gyr.r * DEG_TO_RAD);
+	float cosRoll = cosf(gyr.r * DEG_TO_RAD);
+	float sinPitch = sinf(gyr.p * DEG_TO_RAD);
+	float cosPitch = cosf(gyr.p * DEG_TO_RAD);
+
+	float cosPitchInverse = 1 / cosPitch;
+
+	gyr.dx = cosPitchInverse * (gyr.dy * cosRoll * cosPitch - gyr.dz * sinRoll * cosPitch);
+	gyr.dy = cosPitchInverse * (gyr.dx * cosPitch + gyr.dy * sinRoll * sinPitch + gyr.dz * cosRoll * sinPitch);
+	gyr.dz = cosPitchInverse * (gyr.dy * sinRoll + gyr.dz * cosRoll);
+
+	gyr.r += (gyr.dy * sampleRate);
+	gyr.p += (gyr.dx * sampleRate);
+	gyr.y += (gyr.dz * sampleRate);
+
 }
 
 /* Standstill calibration - Taking N-samples to get a offset for every axis.*/
@@ -263,7 +289,6 @@ void IMU::magCalibrate() {
 	magXMin = xMin;
 	magYMin = yMin;
 	magZMin = zMin;
-
 
 	magXDiff = (xMax - xMin);
 	magYDiff = (yMax - yMin);

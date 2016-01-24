@@ -7,9 +7,7 @@
 
 #include "Extern.h"
 
-/* I2C 1 - user for the light and the current sensors.*/
-HAL_GPIO I2C_EN(GPIO_055);
-HAL_I2C I2C_1(I2C_IDX1);
+
 
 /* Communication UART*/
 HAL_UART bluetooth_uart(UART_IDX2);
@@ -38,6 +36,8 @@ HAL_PWM HBRIDGE_C(PWM_IDX14);
 HAL_GPIO HBRIDGE_C_INA(GPIO_072);
 HAL_GPIO HBRIDGE_C_INB(GPIO_074);
 
+
+// Move that one to the adc class
 /* ADC*/
 HAL_ADC ADC_1(ADC_IDX2);
 

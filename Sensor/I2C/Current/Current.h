@@ -63,19 +63,20 @@ struct CurrentValues {
 
 class Current {
 public:
-	Current(uint8_t adress);
+	Current(uint8_t adress, HAL_I2C *i2c);
 	// return [0] power; return [1] current
 	void getPowerCurrent(float *values);
 	virtual ~Current();
 
 private:
+	// Reference to the i2c
+	HAL_I2C *i2c;
+
 	// Read raw vales
 	int8_t read();
-	// Initialize current sensor
-	void init();
 
-	//The register addresses of the INA219 current sensor
-	//Every register has 2 bytes of data, so two bytes need to be sent over i2c
+	// The register addresses of the INA219 current sensor
+	// Every register has 2 bytes of data, so two bytes need to be sent over i2c
 	const uint8_t CONFIG_REG[1] = { CONFIGURATION_REG_ADDR };
 	const uint8_t SHUNT_REG[1] = { SHUNT_VOLTAGE_REG_ADDR };
 	const uint8_t BUS_V_REG[1] = { BUS_VOLTAGE_REG_ADDR };

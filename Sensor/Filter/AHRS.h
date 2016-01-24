@@ -24,7 +24,6 @@ public:
 	void setAlpha(float alpha);
 	void setAllValuesToZero();
 	void setGyrYawToMagYaw();
-	void setValToGrad();
 
 	float rFus;
 	float pFus;

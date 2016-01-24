@@ -26,10 +26,10 @@ private:
 	float readInternal();
 	HAL_ADC * sensor;
 	int totalSamples;
-	int MaxSamples;
+	int maxSamples;
 	float dist[20];
 	float volt[20];
-	float A, B, C;
+	float a, b, c;
 };
 
 #endif /* SENSOR_ADC_IR_H_ */

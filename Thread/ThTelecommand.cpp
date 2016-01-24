@@ -1,5 +1,6 @@
 /*
- * ThTelecommand.cpp
+
+I * ThTelecommand.cpp
  *
  *  Created on: 02.01.2016
  *      Author: pinker
@@ -16,7 +17,8 @@
 #include "../TCTM/SerializationUtil.h"
 #include <stdio.h>
 
-//Threads objects
+
+// Threads objects
 ThTelemetry tm("Telemetry");
 ThTelecommand tc("Telecommand");
 /* Definition of the H-bridges*/
@@ -28,6 +30,7 @@ Hbridge irMotor(1000, 1000, &HBRIDGE_C, &HBRIDGE_C_INA, &HBRIDGE_C_INB);
 //ThSolar thSolar("Solar", &thKnife);
 /* The IMU thread gets the reference to flywheel*/
 ThImuRead imuRead("IMURead", &flWheel);
+
 
 //IR sensor: gets reference to ADC
 //IR irSensor(&ADC_1);
@@ -48,8 +51,7 @@ void ThTelecommand::init() {
 }
 
 //Run function for binary protocol
-void ThTelecommand::run_binary()
-{
+void ThTelecommand::run_binary() {
 	char out[6];
 	char tmp;
 	int i = -1;
@@ -59,14 +61,13 @@ void ThTelecommand::run_binary()
 	while (1) {
 		i = -1;
 		nbr = false;
-		for(i= 0; i<6; i++) {
+		for (i = 0; i < 6; i++) {
 			uart_stdout.suspendUntilDataReady();
 			out[i] = uart_stdout.getcharNoWait();
 		}
 		cmd = SerializationUtil::ReadInt32(out, 2);
 		//Commands with extra parameter
-		switch(cmd)
-		{
+		switch (cmd) {
 		case TRAC:
 		case PONT:
 		case PICT:
@@ -76,7 +77,7 @@ void ThTelecommand::run_binary()
 		case CTKP:
 		case CTSP:
 		case FWTO:
-			for(i= 0; i<2; i++) {
+			for (i = 0; i < 2; i++) {
 				uart_stdout.suspendUntilDataReady();
 				out[i] = uart_stdout.getcharNoWait();
 			}
@@ -125,9 +126,8 @@ void ThTelecommand::run_text() {
 	}
 }
 
-void ThTelecommand::run()
-{
-	if(PROTOCOL_BINARY)
+void ThTelecommand::run() {
+	if (PROTOCOL_BINARY)
 		run_binary();
 	else
 		run_text();

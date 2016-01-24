@@ -16,11 +16,14 @@
 #include <stdio.h>
 
 ThImuRead::ThImuRead(const char* name, Hbridge *flWheel) {
-	//Read the battery values
-	//Current batteries(ADDR_BATT);
-	float batval[2];
+	// Read the battery values
+	// Current batteries(ADDR_BATT);
+	float batVal[2];
 
+	// Reference to the H-Bridge
 	this->flWheel = flWheel;
+
+
 	flag = false;
 	changeAlphaFlag = false;
 	epsilonFlag = false;
@@ -47,8 +50,8 @@ void ThImuRead::init() {
 }
 
 void ThImuRead::run() {
-	// Sample rate = 0.01 s
-	IMU imu(this, 0.01);
+	// Sample rate = 0.015 s
+	IMU imu(this, 0.015);
 	imu.accSetDefaultValues();
 
 	int cnt = 0;
@@ -69,6 +72,7 @@ void ThImuRead::run() {
 
 	//endless loop with calibration selection
 	while (1) {
+		PRINTF("Now im in the imu read thead");
 		//Gyro calibration with TC. Sets all AHRS values to zero.
 		if (gyrCalFlag) {
 			imu.gyrCalibrate();
@@ -121,12 +125,12 @@ void ThImuRead::run() {
 
 		flag = magCalFlag = gyrCalFlag = accCalFlag = changeAlphaFlag = setPointFlag = kpFlag = kdFlag = kiFlag = epsilonFlag = false;
 
-		//inner read loop
+		// Inner read loop
 		while (1) {
+			PRINTF("Read I \r\n");
 			imu.accRead();
 			imu.gyrRead();
-			//imu.magRead();
-			imu.magReadLSM303DLH();
+			//imu.magReadLSM303DLH();
 
 			ahrs.filterUpdate2(&imu.acc, &imu.gyr, &imu.mag);
 
@@ -141,44 +145,15 @@ void ThImuRead::run() {
 
 				char out[80];
 
-				sprintf(out, "mY %d\r\n", (int)ahrs.mY);
+				sprintf(out, "AM r:%.1f p:%.1f y:%.1f\r\n", imu.acc.r, imu.acc.p, ahrs.mY);
 				PRINTF(out);
 
-//				sprintf(out, "simple My %d\r\n", (int)(atan2(imu.mag.y, imu.mag. x))*RAD_TO_DEG);
-//				PRINTF(out);
+				sprintf(out, "G  r:%.1f p:%.1f y:%.1f\r\n", imu.gyr.r, imu.gyr.r, imu.gyr.r);
+				PRINTF(out);
+				PRINTF("----------------------------\r\n");
 
-//
-//				sprintf(out, "Gy %+.2f\r\n", imu.gyr.y);
-//				PRINTF(out);
-
-//				sprintf(out, "G y%+d\r\n", (int) imu.gyr.y);
-//				PRINTF(out);
-//				sprintf(out, "M y%+d\r\n", (int) ahrs.mY);
-//				PRINTF(out);
-//				sprintf(out, "F y%+d\r\n", (int) ahrs.yFus);
-//				PRINTF(out);
-				//sprintf(out, "A R%+d  P%+d\r\n", (int) (imu.acc.r), (int) (imu.acc.p));
-				//PRINTF(out);
-				//sprintf(out, "F x%d  y%d   z%d\r\n", (int) (ahrs.yFusion), (int) (ahrs.xFusion), (int) (ahrs.zFusion));
-
-				//PRINTF("F x%d  y%d   z%d\r\n", (int) (ahrs.yFusion), (int) (ahrs.xFusion), (int) (ahrs.zFusion));
-
-//				char out[80];
-//				//sprintf(out, "kp: %f ki %f eps: %f\r\n" controller.kp, controller.ki, controller.epsilon);
-//
-//
-//				sprintf(out, "kp %.3f ki %.3f kd %.3f eps%.3f\r\n", controller.kp, controller.ki, controller.kd, controller.epsilon );
-//				PRINTF(out);
-//				sprintf(out, "G dz %.3f setpoint %f\r\n", ahrs.gY, setPoint);
-//				PRINTF(out);
-//				sprintf(out, "ERR %+.3f INT %+.3f OUTP %+.3f\r\n", controller.error, controller.integral, controller.output);
-//				PRINTF(out);
-//				PRINTF("Motor duty: %d\r\n", duty);
-//
-//				//PRINTF("kp: %f ki %f eps: %f\r\n", controller.kp, controller.ki, controller.epsilon);
-//				//PRINTF("G dz %f setpoint %f\r\n", imu.gyr.dz, setPoint);
-//				//PRINTF("ERR %f INT %f OUTP %f\r\n", controller.error, controller.integral, controller.output);
-//				//PRINTF("Motor duty: %d\r\n", duty);
+				sprintf(out, "F  r:%.1f p:%.1f y:%.1f\r\n\n\n", ahrs.rFus, ahrs.pFus, ahrs.yFus);
+				PRINTF(out);
 //
 //				//enables the motor to controll the S/C
 //				if (motorCtrl) {

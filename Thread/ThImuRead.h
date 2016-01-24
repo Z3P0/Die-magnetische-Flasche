@@ -101,7 +101,6 @@ private:
 
 	// Reference to the motor
 	Hbridge *flWheel;
-
 };
 
 #endif /* SENSOR_THIMUREAD_H_ */

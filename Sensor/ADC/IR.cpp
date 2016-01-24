@@ -11,10 +11,10 @@
 
 IR::IR(HAL_ADC * adc) {
 	sensor = adc;
-	MaxSamples = 15;
+	maxSamples = 15;
 	totalSamples = 0;
-	A = C = 0;
-	B = 1;
+	a = c = 0;
+	b = 1;
 }
 
 IR::~IR() {}
@@ -27,7 +27,7 @@ void IR::init() {
 float IR::read() {
 	float x = readInternal();
 	// y = A + Bx + Cx2;
-	return A + B * x + C * x * x;
+	return a + b * x + c * x * x;
 }
 
 float IR::readInternal() {
@@ -41,51 +41,51 @@ void IR::sample(float distance) {
 	volt[totalSamples] = readInternal();
 	PRINTF("SAMPLE %d  Value = %f       Distance = %f \r\n", totalSamples + 1, volt[totalSamples], dist[totalSamples]);
 	totalSamples++;
-	if (totalSamples > MaxSamples) {
+	if (totalSamples > maxSamples) {
 		scale();
 		totalSamples = 0;
 	}
 }
 
 void IR::scale() {
-	float xmean = 0;
+	float xMean = 0;
 	float x2mean = 0;
-	float ymean = 0;
+	float yMean = 0;
 
-	float Sumxi, Sum_xi2, Sum_xiyi, Sum_xi3, Sum_xi4, Sum_xi2yi;
-	Sumxi = Sum_xi2 = Sum_xiyi = Sum_xi3 = Sum_xi4 = Sum_xi2yi = 0;
-	for (int i = 0; i < MaxSamples; i++) {
+	float sum_xi, sum_xi2, sum_xiyi, sum_xi3, sum_xi4, sum_xi2yi;
+	sum_xi = sum_xi2 = sum_xiyi = sum_xi3 = sum_xi4 = sum_xi2yi = 0;
+	for (int i = 0; i < maxSamples; i++) {
 		float xi = volt[i];
 		float yi = dist[i];
 		float xi2 = xi * xi;
 		float xi3 = xi2 * xi;
 
-		Sumxi += xi;
-		Sum_xi2 += xi2;
-		Sum_xiyi += xi * yi;
-		Sum_xi3 += xi3;
-		Sum_xi4 += xi3 * xi;
-		Sum_xi2yi += xi2 * yi;
+		sum_xi += xi;
+		sum_xi2 += xi2;
+		sum_xiyi += xi * yi;
+		sum_xi3 += xi3;
+		sum_xi4 += xi3 * xi;
+		sum_xi2yi += xi2 * yi;
 
-		ymean += dist[i];
+		yMean += dist[i];
 	}
-	xmean = Sumxi / MaxSamples;
-	x2mean = Sum_xi2 / MaxSamples;
-	ymean = ymean / MaxSamples;
+	xMean = sum_xi / maxSamples;
+	x2mean = sum_xi2 / maxSamples;
+	yMean = yMean / maxSamples;
 
-	float Sxx, Sxy, Sxx2, Sx2x2, Sx2y;
-	Sxx = (Sum_xi2 / MaxSamples) - (xmean * xmean);
-	Sxy = (Sum_xiyi / MaxSamples) - (xmean * ymean);
-	Sxx2 = (Sum_xi3 / MaxSamples) - (xmean * x2mean);
-	Sx2x2 = (Sum_xi4 / MaxSamples) - (x2mean * x2mean);
-	Sx2y = (Sum_xi2yi / MaxSamples) - (x2mean * ymean);
+	float sxx, sxy, sxx2, sx2x2, sx2y;
+	sxx = (sum_xi2 / maxSamples) - (xMean * xMean);
+	sxy = (sum_xiyi / maxSamples) - (xMean * yMean);
+	sxx2 = (sum_xi3 / maxSamples) - (xMean * x2mean);
+	sx2x2 = (sum_xi4 / maxSamples) - (x2mean * x2mean);
+	sx2y = (sum_xi2yi / maxSamples) - (x2mean * yMean);
 
-	float denom = ((Sxx * Sx2x2) - (Sxx2 * Sxx2));
-	B = ((Sxy * Sx2x2) - (Sx2y * Sxx2)) / denom;
-	C = ((Sx2y * Sxx) - (Sxy * Sxx2)) / denom;
-	A = ymean - B * xmean - C * x2mean;
+	float denom = ((sxx * sx2x2) - (sxx2 * sxx2));
+	b = ((sxy * sx2x2) - (sx2y * sxx2)) / denom;
+	c = ((sx2y * sxx) - (sxy * sxx2)) / denom;
+	a = yMean - b * xMean - c * x2mean;
 
 	PRINTF("Scaling IR... New parameters:\r\n");
-	PRINTF("A = %f      B = %f      C = %f \r\n", A, B, C);
+	PRINTF("A = %f      B = %f      C = %f \r\n", a, b, c);
 }
 
