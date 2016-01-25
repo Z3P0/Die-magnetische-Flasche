@@ -29,8 +29,10 @@ ThImuRead::ThImuRead(const char* name, Hbridge *flWheel) {
 	accPrint = false;
 	gyrPrint = false;
 	magPrint = false;
-	readLight = false;
-	solarRead = true;
+	filPrint = false;
+	lightPrint = false;
+	solarPrint = false;
+	irPrint = true;
 
 	flag = false;
 	changeAlphaFlag = false;
@@ -164,7 +166,7 @@ void ThImuRead::run() {
 			imu.gyrRead();
 			imu.magReadLSM303DLH();
 
-//		ahrs.filterUpdate2(&imu.acc, &imu.gyr, &imu.mag);
+			ahrs.filterUpdate2(&imu.acc, &imu.gyr, &imu.mag);
 
 			// input value is just the gyro dz value!
 			//duty = controller.pi(setPoint, imu.gyr.dz);
@@ -173,11 +175,11 @@ void ThImuRead::run() {
 			duty = controller.pid(setPoint, ahrs.gY);
 
 			// Print
-			if ((cnt++ > 22) && (send)) {
+			if ((cnt++ > 30) && (send)) {
 				cnt = 0;
 
 				// Read Light sensor
-				if (readLight) {
+				if (lightPrint) {
 					ls.read();
 					sprintf(printOutput, "light ch1%d ch1%d\r\n", ls.ch0, ls.ch1);
 					PRINTF(printOutput);
@@ -185,25 +187,47 @@ void ThImuRead::run() {
 
 				// Print Magnetometer data
 				if (accPrint) {
-					sprintf(printOutput, "x %.1f y %.1f z %.1f\r\n", imu.mag.x, imu.mag.y, imu.mag.z);
+					sprintf(printOutput, "A x%.1f y%.1f z%.1f\r\n", imu.acc.x, imu.acc.y, imu.acc.z);
 					PRINTF(printOutput);
-
 				}
 
 				if (gyrPrint) {
-					sprintf(printOutput, "r %.1f p %.1f y %.1f\r\n", imu.gyr.r, imu.gyr.p, imu.gyr.y);
+					sprintf(printOutput, "G dx%.1f dy%.1f dz%.1f\r\n", imu.gyr.dx, imu.gyr.dy, imu.gyr.dz);
 					PRINTF(printOutput);
 				}
 
 				if (magPrint) {
-					sprintf(printOutput, "x %.1f y %.1f z %.1f\r\n", imu.mag.x, imu.mag.y, imu.mag.z);
+					sprintf(printOutput, "M x %.1f y %.1f z %.1f\r\n", imu.mag.x, imu.mag.y, imu.mag.z);
 					PRINTF(printOutput);
 				}
 
-				if(solarRead){
+				if (filPrint) {
+					sprintf(printOutput, "MGr%.1f p %.1f y%.1f\r\n", ahrs.fR, ahrs.fP, ahrs.fY);
+					PRINTF(printOutput);
+
+					sprintf(printOutput, "F r%.1f p %.1f y%.1f\r\n", ahrs.fR, ahrs.fP, ahrs.fY);
+					PRINTF(printOutput);
+
+					PRINTF("----------------------------\r\n");
+
+					sprintf(printOutput, "F r%.1f p %.1f y%.1f\r\n", ahrs.fR, ahrs.fP, ahrs.fY);
+					PRINTF(printOutput);
+				}
+
+				if (solarPrint) {
 					sprintf(printOutput, "Solar \r\nvol: %.1f\r\ncur %.1f\r\n", solPan.getVoltage(), solPan.getVoltage());
 					PRINTF(printOutput);
 				}
+
+				if(irPrint){
+//					sprintf(printOutput, "IR1 %f \r\nIR2 %f\r\n", ir1.read(), ir2.read());
+//					PRINTF(printOutput);
+
+					sprintf(printOutput, "IR2 %f\r\n", ir2.read());
+					PRINTF(printOutput);
+
+				}
+
 			}
 
 			//enables/disables motor controller

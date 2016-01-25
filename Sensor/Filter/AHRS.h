@@ -19,7 +19,6 @@ public:
 
 	AHRS(float SAMPLE_RATE);
 	virtual ~AHRS();
-	void filterUpdate(float dGx, float dGy, float dGz, float ax, float ay, float az, float mx, float my, float mz);
 	void filterUpdate2(IMU_Acc* acc, IMU_Gyro* gyr, IMU_Mag* mag);
 	void setAlpha(float alpha);
 	void setAllValuesToZero();

@@ -144,9 +144,6 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
-					<fileInfo id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.12578087.851812815" name="IMU.cpp" rcbsApplicability="disable" resourcePath="Sensor/I2C/IMU/IMU.cpp" toolsToInvoke="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.compiler.291394466.2052317973">
-						<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.compiler.291394466.2052317973" name="Cross ARM C++ Compiler" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.compiler.291394466"/>
-					</fileInfo>
 					<folderInfo id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.12578087.349413354" name="/" resourcePath="Sensor/I2C/Lighsensor">
 						<toolChain id="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug.1024795457" name="Cross ARM GCC" superClass="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug" unusedChildren="">
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.2137684469.945591207" name="Optimization Level" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.2137684469"/>
@@ -197,7 +194,7 @@
 					<fileInfo id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.12578087.1127741855" name="ThSolar.h" rcbsApplicability="disable" resourcePath="Thread/ThSolar.h" toolsToInvoke=""/>
 					<fileInfo id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.12578087.653813445" name="ThTelecommand.h" rcbsApplicability="disable" resourcePath="Thread/ThTelecommand.h" toolsToInvoke=""/>
 					<sourceEntries>
-						<entry excluding="Sensor/OV7670|Sensor/I2C/Current/Current.h|Sensor/I2C/Current/Current.cpp|Sensor/I2C/Lighsensor/Light.h|Sensor/Camera|Sensor/ThImuRead.cpp|Template.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="Sensor/OV7670|Sensor/Camera|Sensor/ThImuRead.cpp|Template.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

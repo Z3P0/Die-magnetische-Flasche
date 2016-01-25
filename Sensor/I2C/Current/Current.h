@@ -19,6 +19,8 @@
 #define CURRENT_REG_ADDR		0x04
 #define CALIBRATION_REG_ADDR	0x05
 
+#define RAW_CAL_REGISTER		1.0
+
 // CONFIGURATION_REG_ADDR
 // ----------------------------------------------
 // Reset Bit: 1=generate reset 					1

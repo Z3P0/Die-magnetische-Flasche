@@ -231,9 +231,13 @@ void IMU::magReadLSM303DLH() {
 	uint8_t data[6];
 	errorDetection(I2C_2.writeRead(magAdressLSM303, outAllAxisLSM303, 1, data, 6), 6);
 
-	mag.x = ((((int16_t) (((data[0] << 8) | data[1])) - magXMin) / magXDiff) * 2 - 1);
-	mag.y = ((((int16_t) (((data[2] << 8) | data[3])) - magYMin) / magYDiff) * 2 - 1);
-	mag.z = ((((int16_t) (((data[4] << 8) | data[5])) - magZMin) / magZDiff) * 2 - 1);
+	mag.xRAW = (int16_t) (((data[0] << 8) | data[1]));
+	mag.yRAW = (int16_t) (((data[2] << 8) | data[3]));
+	mag.zRAW = (int16_t) (((data[4] << 8) | data[5]));
+
+	mag.x = (((mag.xRAW - magXMin) / magXDiff) * 2 - 1);
+	mag.y = (((mag.yRAW - magYMin) / magYDiff) * 2 - 1);
+	mag.z = (((mag.zRAW - magZMin) / magZDiff) * 2 - 1);
 }
 
 /*

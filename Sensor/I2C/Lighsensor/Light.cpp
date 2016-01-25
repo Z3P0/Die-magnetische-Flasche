@@ -15,6 +15,8 @@ Light::Light() {
 
 Light::~Light() {}
 
+
+//TODO Set integration time
 void Light::init() {
 	PRINTF("Configuring light sensor\r\n");
 	// Powers the light sensors up

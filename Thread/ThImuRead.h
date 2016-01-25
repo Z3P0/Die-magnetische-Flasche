@@ -81,12 +81,13 @@ private:
 	bool flag;	 // Flag to leave the main loop
 
 	// Flags for sensor read
-	bool readLight;
+	bool lightPrint;
 	bool accPrint;
 	bool gyrPrint;
 	bool magPrint;
+	bool filPrint;
+	bool solarPrint;
 	bool irPrint;
-	bool solarRead;
 
 	// Flags for calibration
 	bool magCalFlag;
