@@ -31,8 +31,8 @@ ThImuRead::ThImuRead(const char* name, Hbridge *flWheel) {
 	magPrint = false;
 	filPrint = false;
 	lightPrint = false;
-	solarPrint = false;
-	irPrint = true;
+	solarPrint = true;
+	irPrint = false;
 
 	flag = false;
 	changeAlphaFlag = false;
@@ -82,10 +82,11 @@ void ThImuRead::run() {
 	ir1.init();
 
 	IR ir2(&ADC_1, ADC_CHANNEL_IR2);
-	ir1.init();
+	ir2.init();
 
 	// Solar panel object for voltage and current
 	SolarPannel solPan(&ADC_1, ADC_CHANNEL_SOL_A, ADC_CHANNEL_SOL_V);
+	solPan.init();
 
 	char printOutput[80];
 
@@ -215,13 +216,16 @@ void ThImuRead::run() {
 				}
 
 				if (solarPrint) {
-					sprintf(printOutput, "Solar \r\nvol: %.1f\r\ncur %.1f\r\n", solPan.getVoltage(), solPan.getVoltage());
+					sprintf(printOutput, "Solar vol: %.2f\r\n", solPan.getVoltage());
 					PRINTF(printOutput);
+
+//					sprintf(printOutput, "Solar cur: %.1f\r\n", solPan.getCurrent());
+//					PRINTF(printOutput);
 				}
 
 				if(irPrint){
-//					sprintf(printOutput, "IR1 %f \r\nIR2 %f\r\n", ir1.read(), ir2.read());
-//					PRINTF(printOutput);
+					sprintf(printOutput, "IR1 %f\r\n", ir1.read());
+					PRINTF(printOutput);
 
 					sprintf(printOutput, "IR2 %f\r\n", ir2.read());
 					PRINTF(printOutput);

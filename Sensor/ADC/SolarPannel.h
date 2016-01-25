@@ -24,6 +24,7 @@ public:
 	float getCurrent();
 	// Converts the ADC value to [A]
 	float getVoltage();
+	void init();
 
 private:
 	/* Internal function to read the ADC channel*/
