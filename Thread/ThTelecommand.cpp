@@ -19,7 +19,6 @@ I * ThTelecommand.cpp
 #include "../Sensor/OV7670/camera.h"
 #include "../Define/Define.h"
 
-
 // Threads objects
 ThTelemetry tm("Telemetry");
 ThTelecommand tc("Telecommand");
@@ -33,12 +32,12 @@ Hbridge irMotor(1000, 1000, &HBRIDGE_C, &HBRIDGE_C_INA, &HBRIDGE_C_INB);
 /* The IMU thread gets the reference to flywheel*/
 ThImuRead imuRead("IMURead", &flWheel);
 
-
 //IR sensor: gets reference to ADC
-IR irSensor(&ADC_1);
+//IR irSensor(&ADC_1);
 //Mission thread: gets reference to IR sensor
-ThMission thMission("Mission", &irSensor, &irMotor);
-Camera cam;
+//ThMission thMission("Mission", &irSensor, &irMotor);
+//Camera cam;
+
 
 ThTelecommand::ThTelecommand(const char* name) {
 	cmd = value = 0;
@@ -135,8 +134,8 @@ void delayx(int x)
 
 void ThTelecommand::run()
 {
-	I2C_1.init();
-	cam.init();
+	//I2C_1.init();
+	//cam.init();
 
 #ifdef PROTOCOL_BINARY
 		run_binary();
@@ -268,7 +267,7 @@ void ThTelecommand::exectue() {
 
 	case (PICT):
 		//PRINTF("TC: TODO picture mode");
-		cam.takePicture();
+		//cam.takePicture();
 
 #ifdef PROTOCOL_BINARY
 	PRINTF("%c", 0x00);
@@ -297,7 +296,7 @@ void ThTelecommand::exectue() {
 		break;
 
 	case (MISSION):
-		thMission.toggleMission();
+//		thMission.toggleMission();
 		break;
 
 	case (IRSM):

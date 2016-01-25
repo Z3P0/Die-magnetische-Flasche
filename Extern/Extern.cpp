@@ -7,8 +7,6 @@
 
 #include "Extern.h"
 
-/* Communication UART*/
-//HAL_UART bluetooth_uart(UART_IDX2);
 
 /* Blue LED - the last that is not effected by the H-bridge*/
 HAL_GPIO BlueLED(GPIO_063);
@@ -34,10 +32,9 @@ HAL_PWM HBRIDGE_C(PWM_IDX14);
 HAL_GPIO HBRIDGE_C_INA(GPIO_072);
 HAL_GPIO HBRIDGE_C_INB(GPIO_074);
 
-
-// Move that one to the adc class
-/* ADC*/
-HAL_ADC ADC_1(ADC_IDX2);
+/* ADCs*/
+HAL_ADC ADC_1(ADC_IDX1);
+HAL_ADC ADC_2(ADC_IDX2);
 
 HAL_UART BT(UART_IDX2);
 

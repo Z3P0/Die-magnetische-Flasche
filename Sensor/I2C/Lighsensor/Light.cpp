@@ -9,7 +9,6 @@
 #include "../../../Define/Define.h"
 #include "../../../Extern/Extern.h"
 
-
 Light::Light() {
 	init();
 }
@@ -18,17 +17,16 @@ Light::~Light() {}
 
 void Light::init() {
 	PRINTF("Configuring light sensor\r\n");
-
-	//Powers the light sensors up
+	// Powers the light sensors up
 	I2C_1.write(lightAdress, lightCtrlReg, 2);
 }
 
 /*
  * Error check by the number of the returned bytes
- * return 0 no error
- * return -1 error
+ * @return 0 no error
+ * @return -1 error
  */
-uint8_t Light::read() {
+int16_t Light::read() {
 	uint8_t data[2];
 	if(I2C_1.writeRead(lightAdress, CHANNEL_0_LOW, 1, data, 2) != 2)
 		return -1;
@@ -43,6 +41,10 @@ uint8_t Light::read() {
 	return 0;
 }
 
+/*
+ * Merged and calculates the lux values how its dicribed in the datasheet
+ * @return lux value
+ */
 float Light::getLuxValue() {
 	// Read and check for errors.
 	if(read() == -1)

@@ -60,7 +60,6 @@ struct IMU_Mag {
 	float x;
 	float y;
 	float z;
-
 };
 
 class IMU {

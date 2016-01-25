@@ -38,6 +38,7 @@ extern HAL_GPIO HBRIDGE_C_INA;
 extern HAL_GPIO HBRIDGE_C_INB;
 
 extern HAL_ADC ADC_1;
+extern HAL_ADC ADC_2;
 
 extern HAL_UART BT;
 

@@ -20,7 +20,7 @@
 #define int16Max			32768
 
 #define SAMPLING_TIME		0.015
-#define i2c_1_speed		100000
+#define i2c_1_speed			100000
 
 //#define PROTOCOL_BINARY
 
@@ -31,5 +31,14 @@
 #define IMAGESIZE (WIDTH*HEIGHT*2) //multiply by 2 because we use YUV
 #define YUV422
 #define CAMADR 0x21
+
+/*ADC Cannels*/
+#define ADC_CHANNEL_IR1		ADC_CH_013	// PC3
+#define ADC_CHANNEL_IR2		ADC_CH_012	// PC5
+#define ADC_CHANNEL_SOL_A	ADC_CH_005	// PA5
+#define ADC_CHANNEL_SOL_V	ADC_CH_007	// PA7
+
+
+
 
 #endif /* DEFINE_H_ */

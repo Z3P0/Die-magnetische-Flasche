@@ -153,16 +153,16 @@
 // MS2										0
 
 #define CRB_REG_M_ADDRESS 		0x01
-#define CRB_REG_M_VALUE 		0b00100000
+#define CRB_REG_M_VALUE 		0b01000000
 
-// Sensor field input range 1.3 mGs milli Gauss
-#define LSM303_MAG_GAIN_XY		1055
-#define LSM303_MAG_GAIN_Z		950
+// Sensor field input range +-1.9 Gs milli Gauss
+#define LSM303_MAG_GAIN_XY		795
+#define LSM303_MAG_GAIN_Z		710
 // CRA_REG_M
 // ---------------------------------
 // GN 2										0
-// GN 1										0
-// GN 0										1
+// GN 1										1
+// GN 0										0
 // default	 								00000
 
 #define MR_REG_M_ADDRESS 		0x02
@@ -174,9 +174,5 @@
 // Continuous-conversion
 // MD1										0
 // MD2										0
-
-
-
-
 
 #endif /* REGISTERS_H_ */

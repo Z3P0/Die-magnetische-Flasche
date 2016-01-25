@@ -63,15 +63,12 @@ struct CurrentValues {
 
 class Current {
 public:
-	Current(uint8_t adress, HAL_I2C *i2c);
+	Current(uint8_t adress);
 	// return [0] power; return [1] current
 	void getPowerCurrent(float *values);
 	virtual ~Current();
 
 private:
-	// Reference to the i2c
-	HAL_I2C *i2c;
-
 	// Read raw vales
 	int8_t read();
 

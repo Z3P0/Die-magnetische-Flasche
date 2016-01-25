@@ -11,6 +11,7 @@
 #include "../Controller/PiController.h"
 #include "../Actuators/Hbridge.h"
 
+
 class ThImuRead: public Thread {
 public:
 	ThImuRead(const char* name, Hbridge *flWheel);
@@ -21,7 +22,7 @@ public:
 	void gyrCalibrate();
 	void setAlpha(int alpha);
 
-	//setter for the private values
+	// Setter for the private values
 	void setFlag() {
 		flag = true;
 	}
@@ -78,6 +79,14 @@ private:
 	bool send;
 
 	bool flag;	 // Flag to leave the main loop
+
+	// Flags for sensor read
+	bool readLight;
+	bool accPrint;
+	bool gyrPrint;
+	bool magPrint;
+	bool irPrint;
+	bool solarRead;
 
 	// Flags for calibration
 	bool magCalFlag;

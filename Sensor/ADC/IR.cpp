@@ -7,9 +7,9 @@
 
 #include "IR.h"
 
-//HAL_ADC sensor(ADC_IDX1);
 
-IR::IR(HAL_ADC * adc) {
+IR::IR(HAL_ADC * adc, ADC_CHANNEL cha) {
+	channel = cha;
 	sensor = adc;
 	maxSamples = 15;
 	totalSamples = 0;
@@ -21,8 +21,9 @@ IR::~IR() {}
 
 void IR::init() {
 	sensor->config(ADC_PARAMETER_RESOLUTION, 12);
-	sensor->init(ADC_CH_013);
+	sensor->init(channel);
 }
+
 
 float IR::read() {
 	float x = readInternal();
@@ -31,9 +32,10 @@ float IR::read() {
 }
 
 float IR::readInternal() {
-	int32_t val = sensor->read(ADC_CH_013);
+	int32_t val = sensor->read(channel);
 	val = val & 0xFFFFFFF8;     //Removing noise on LSBs
-	return ((float) val) / 839;
+	// TODO Check the magic value 819
+	return ((float) val) / 819; // Calculated somehow
 }
 
 void IR::sample(float distance) {

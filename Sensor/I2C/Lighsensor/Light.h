@@ -24,13 +24,13 @@
 //	VCC		red    ------------------------------- red 	   VCC
 //
 
-/*--Light sensor--*/
+// Addresses
 #define LIGHT_ADDRESS			0x39
-#define CTRL_REG		    	0x00
+#define CTRL_REG		    	(0x00| 0x80)
 #define POWER_UP				0x03
 
-#define CH0_DATA_LOW          	0x0C  // Channel 0: Visible + IR light
-#define CH1_DATA_LOW          	0x0E  // Channel 1: IR light
+#define CH0_DATA_LOW          	(0x0C| 0xA0)	// Channel 0: Visible + IR light
+#define CH1_DATA_LOW          	(0xAE| 0xA0) 	// Channel 1: IR light
 
 class Light {
 public:
@@ -42,22 +42,24 @@ public:
 	 * coefficient. After that a formula as described in the data sheet is used.
 	 */
 	float getLuxValue();
+	int16_t read();
+	int16_t ch0;     // Channel 0: Visible + IR light
+	int16_t ch1;     // Channel 1: IR light
+
 
 private:
-	// Reference to the i2c
-	HAL_I2C *i2c;
+//	int16_t read();
+//	int16_t ch0;     // Channel 0: Visible + IR light
+//	int16_t ch1;     // Channel 1: IR light
 
-	int16_t ch0;  // Channel 0: Visible + IR light
-	int16_t ch1;  // Channel 1: IR light
-
-	/*Light sensor*/
+	// Light sensor
 	const uint8_t lightAdress = LIGHT_ADDRESS;
 	const uint8_t lightCtrlReg[2] = { CTRL_REG, POWER_UP };
-	const uint8_t CHANNEL_0_LOW[1] = { CH0_DATA_LOW | 0xA0 };
-	const uint8_t CHANNEL_1_LOW[1] = { CH1_DATA_LOW | 0xA0 };
+	const uint8_t CHANNEL_0_LOW[1] = { CH0_DATA_LOW };
+	const uint8_t CHANNEL_1_LOW[1] = { CH1_DATA_LOW };
 
 	void init();
-	uint8_t read();
+
 };
 
 #endif /* SENSOR_LIGHT_H_ */
