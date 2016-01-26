@@ -9,14 +9,14 @@
 #define SENSOR_ADC_SOLARPANNEL_H_
 #include "../../Extern/Include.h"
 
-#define R1		1.98 //[k Ohm]
-#define R2		8.0  //[k Ohm]
-#define R3		150.0 //[Ohm]
-#define R4		2.2   //[k Ohm]
-#define R5		1.0   //[k Ohm]
+#define R1		1.98E3 //[Ohm]
+#define R2		8.0E3  //[Ohm]
+#define R3		150.0  //[Ohm]
+#define R4		2.2E3  //[Ohm]
+#define R5		1.0E3  //[Ohm]
 
-#define VOL_CAL	2.4125 // Voltage calibration value
-#define CUR_CAL	2.8875 //Current calibration value
+#define VOL_CAL	(2.4125/4095) // Voltage calibration value
+#define CUR_CAL	(2.8875/4095) //Current calibration value
 
 
 class SolarPannel {
@@ -32,6 +32,9 @@ public:
 	float getCurrent();
 	// Converts the ADC value to [A]
 	float getVoltage();
+	// Returns the power
+	float getPower();
+
 	void init();
 
 private:
@@ -40,6 +43,10 @@ private:
 	HAL_ADC * sensor;
 	ADC_CHANNEL  chVoltage;
 	ADC_CHANNEL  chCurrent;
+
+
+	float volVal; 	// (R1+R2)/ R1
+	float curVal;	// (R4+R5)/ (R5 * R3)
 };
 
 #endif /* SENSOR_ADC_SOLARPANNEL_H_ */

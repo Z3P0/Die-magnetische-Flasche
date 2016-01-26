@@ -17,9 +17,9 @@
 #define KD_PI 		0.1182		// Derivative gain
 
 // Controller values for PID
-#define KP_PID 		0.026 		// Proportional gain
-#define KI_PID 		0.0004		// Integral gain
-#define KD_PID 		0.1182		// Derivative gain
+#define KP_PID 		0.02675 	// Proportional gain
+#define KI_PID 		1.000443	// Integral gain
+#define KD_PID 		0.11827		// Derivative gain
 
 
 

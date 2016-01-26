@@ -14,6 +14,9 @@ SolarPannel::SolarPannel(HAL_ADC * adc, ADC_CHANNEL chVoltage, ADC_CHANNEL chCur
 	this->chVoltage = chVoltage;
 	this->chCurrent = chCurrent;
 	sensor = adc;
+
+	volVal = R1 * (R1 + R2);
+	curVal = (R1 + R2) / R1;
 }
 
 void SolarPannel::init() {
@@ -33,11 +36,17 @@ float SolarPannel::getVoltage() {
 	// Resolution 12 bit = 4096
 	// Max Voltage = 3.3 V
 	// v_res = (Max Voltage * Result)/4095
-	return (((float)read(&chCurrent)*2.8875)/4095);
-	//return (((float)read(&chVoltage)*2.4125)/4095);
+	float mes = (float)read(&chVoltage) * VOL_CAL;
+	return mes * volVal;
 }
 
 float SolarPannel::getCurrent() {
-	//return (((float)read(&chVoltage)/ 1240) / RESISTANCE);
-	return 0;
+
+	float cur = (float)read(&chVoltage) * CUR_CAL;
+
+	return (((float)read(&chVoltage)* VOL_CAL) /R1 + cur * curVal + cur/R5);
+}
+
+float SolarPannel::getPower(){
+	return (getCurrent() * getVoltage());
 }

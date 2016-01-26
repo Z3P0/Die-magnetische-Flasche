@@ -9,10 +9,12 @@
 
 PiController::PiController() {
 	dt = SAMPLING_TIME;     	// Sampling time of the control function
+	//PI set values
 	kp_pi = KP_PI;
 	ki_pi = KI_PI;
 	kd_pi = KD_PI;
 
+	//PID set values
 	kp_pid = KP_PID;
 	ki_pid = KI_PID;
 	kd_pid = KD_PID;
@@ -81,7 +83,7 @@ int32_t PiController::pid(float setpoint, float actual) {
 
 	preError = error;
 
-	output = kp_pi * error + ki_pi * integral + kd_pi * derivative;
+	output = kp_pid * error + ki_pid * integral + kd_pid * derivative;
 
 
 	// From angular velocity to voltage
