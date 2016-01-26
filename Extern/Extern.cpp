@@ -43,3 +43,6 @@ HAL_I2C I2C_1(I2C_IDX1);
 
 /*DCMI buffer*/
 uint8_t DCMI_Buffer[HEIGHT*WIDTH * 2];
+
+/*Semaphore for Bluetooth communication with ground station*/
+Semaphore BT_Semaphore;

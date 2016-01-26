@@ -14,4 +14,5 @@
 #include "hal.h"
 #include "math.h"
 
+#include "../Define/Define.h"
 #endif /* INCLUDE_H_ */

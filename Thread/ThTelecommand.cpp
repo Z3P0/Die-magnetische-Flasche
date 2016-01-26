@@ -12,6 +12,7 @@ I * ThTelecommand.cpp
 #include "ThMission.h"
 #include "ThImuRead.h"
 #include "ThSolar.h"
+#include "ThCamera.h"
 #include "../TCTM/Telecommand.h"
 #include "../Sensor/ADC/IR.h"
 #include "../TCTM/SerializationUtil.h"
@@ -35,9 +36,8 @@ ThImuRead imuRead("IMURead", &flWheel);
 //IR sensor: gets reference to ADC
 //IR irSensor(&ADC_1);
 //Mission thread: gets reference to IR sensor
-//ThMission thMission("Mission", &irSensor, &irMotor);
-//Camera cam;
-
+ThMission thMission("Mission", &irSensor, &irMotor);
+ThCamera thCamera;
 
 ThTelecommand::ThTelecommand(const char* name) {
 	cmd = value = 0;
@@ -134,8 +134,7 @@ void delayx(int x)
 
 void ThTelecommand::run()
 {
-	//I2C_1.init();
-	//cam.init();
+	I2C_1.init();
 
 #ifdef PROTOCOL_BINARY
 		run_binary();
@@ -267,24 +266,7 @@ void ThTelecommand::exectue() {
 
 	case (PICT):
 		//PRINTF("TC: TODO picture mode");
-		//cam.takePicture();
-
-#ifdef PROTOCOL_BINARY
-	PRINTF("%c", 0x00);
-	PRINTF("%c", 0x02);
-	char len[2];
-	SerializationUtil::WriteInt((int16_t)HEIGHT,len,0);
-	PRINTF("%c%c", len[0], len[1]);
-	SerializationUtil::WriteInt((int16_t)WIDTH,len,0);
-	PRINTF("%c%c", len[0], len[1]);
-#else
-	PRINTF("I");
-#endif
-		for(int j=0; j<HEIGHT*2;j++){
-			for(int i=0; i<WIDTH; i++)
-				PRINTF("%c",DCMI_Buffer[i+j*WIDTH]);
-			suspendCallerUntil(NOW()+5*MILLISECONDS);
-		}
+                thCamera.captureAndSend();
 		break;
 
 	case (PONT):
@@ -300,7 +282,7 @@ void ThTelecommand::exectue() {
 		break;
 
 	case (IRSM):
-		//irSensor.sample(value);
+		irSensor.sample(value);
 		break;
 
 	default:

@@ -11,10 +11,10 @@
 IR::IR(HAL_ADC * adc, ADC_CHANNEL cha) {
 	channel = cha;
 	sensor = adc;
-	maxSamples = 15;
 	totalSamples = 0;
-	a = c = 0;
-	b = 1;
+	a = 40.526;
+	b = -19.181;
+	c = 1.033;
 }
 
 IR::~IR() {}
@@ -42,7 +42,7 @@ void IR::sample(float distance) {
 	volt[totalSamples] = readInternal();
 	PRINTF("SAMPLE %d  Value = %f       Distance = %f \r\n", totalSamples + 1, volt[totalSamples], dist[totalSamples]);
 	totalSamples++;
-	if (totalSamples > maxSamples) {
+	if (totalSamples > MAXSAMPLES) {
 		scale();
 		totalSamples = 0;
 	}
@@ -55,7 +55,7 @@ void IR::scale() {
 
 	float sum_xi, sum_xi2, sum_xiyi, sum_xi3, sum_xi4, sum_xi2yi;
 	sum_xi = sum_xi2 = sum_xiyi = sum_xi3 = sum_xi4 = sum_xi2yi = 0;
-	for (int i = 0; i < maxSamples; i++) {
+	for (int i = 0; i < MAXSAMPLES; i++) {
 		float xi = volt[i];
 		float yi = dist[i];
 		float xi2 = xi * xi;
@@ -70,16 +70,16 @@ void IR::scale() {
 
 		yMean += dist[i];
 	}
-	xMean = sum_xi / maxSamples;
-	x2mean = sum_xi2 / maxSamples;
-	yMean = yMean / maxSamples;
+	xMean = sum_xi / MAXSAMPLES;
+	x2mean = sum_xi2 / MAXSAMPLES;
+	yMean = yMean / MAXSAMPLES;
 
 	float sxx, sxy, sxx2, sx2x2, sx2y;
-	sxx = (sum_xi2 / maxSamples) - (xMean * xMean);
-	sxy = (sum_xiyi / maxSamples) - (xMean * yMean);
-	sxx2 = (sum_xi3 / maxSamples) - (xMean * x2mean);
-	sx2x2 = (sum_xi4 / maxSamples) - (x2mean * x2mean);
-	sx2y = (sum_xi2yi / maxSamples) - (x2mean * yMean);
+	sxx = (sum_xi2 / MAXSAMPLES) - (xMean * xMean);
+	sxy = (sum_xiyi / MAXSAMPLES) - (xMean * yMean);
+	sxx2 = (sum_xi3 / MAXSAMPLES) - (xMean * x2mean);
+	sx2x2 = (sum_xi4 / MAXSAMPLES) - (x2mean * x2mean);
+	sx2y = (sum_xi2yi / MAXSAMPLES) - (x2mean * yMean);
 
 	float denom = ((sxx * sx2x2) - (sxx2 * sxx2));
 	b = ((sxy * sx2x2) - (sx2y * sxx2)) / denom;

@@ -26,9 +26,8 @@ private:
 	HAL_ADC * sensor;
 	ADC_CHANNEL  channel;
 	int totalSamples;
-	int maxSamples;
-	float dist[20];
-	float volt[20];
+	float dist[MAXSAMPLES];
+	float volt[MAXSAMPLES];
 	float a, b, c;
 };
 

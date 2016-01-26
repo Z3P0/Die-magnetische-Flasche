@@ -46,5 +46,6 @@ extern HAL_I2C I2C_1;
 
 extern uint8_t DCMI_Buffer[HEIGHT*WIDTH * 2];
 
+extern Semaphore BT_Semaphore;
 
 #endif /* EXTERN_H_ */
