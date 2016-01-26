@@ -163,17 +163,17 @@ void ThImuRead::run() {
 
 		if (kdFlag) {
 			controller.setDerivative((value / 1000.00));
-			PRINTF("Controller new kd value %f \r\n", controller.ki);
+			PRINTF("Controller new kd value %f \r\n", controller.ki_pi);
 		}
 
 		if (kiFlag) {
 			controller.setIntegral((value / 1000.00));
-			PRINTF("Controller new ki value %f \r\n", controller.ki);
+			PRINTF("Controller new ki value %f \r\n", controller.ki_pi);
 		}
 
 		if (kpFlag) {
 			controller.setProportional((value / 1000.00));
-			PRINTF("Controller new kp value %f \r\n", controller.kp);
+			PRINTF("Controller new kp value %f \r\n", controller.kp_pi);
 		}
 
 		if (setPointFlag) {

@@ -11,9 +11,12 @@
 
 #define R1		1.98 //[k Ohm]
 #define R2		8.0  //[k Ohm]
-
 #define R3		150.0 //[Ohm]
 #define R4		2.2   //[k Ohm]
+#define R5		1.0   //[k Ohm]
+
+#define VOL_CAL	2.4125 // Voltage calibration value
+#define CUR_CAL	2.8875 //Current calibration value
 
 
 class SolarPannel {

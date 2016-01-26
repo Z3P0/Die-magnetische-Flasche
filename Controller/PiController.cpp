@@ -9,9 +9,13 @@
 
 PiController::PiController() {
 	dt = SAMPLING_TIME;     	// Sampling time of the control function
-	kp = KP;
-	ki = KI;
-	kd = KD;
+	kp_pi = KP_PI;
+	ki_pi = KI_PI;
+	kd_pi = KD_PI;
+
+	kp_pid = KP_PID;
+	ki_pid = KI_PID;
+	kd_pid = KD_PID;
 
 	epsilon = EPSILON;
 	factor = (PWM_RES / V_MAX_HBrdg);     // PWM Resolution /V_MAX
@@ -42,7 +46,7 @@ unsigned int PiController::pi(float setpoint, float actual) {
 
 	//derivative= (error - pre_error)/dt;
 	//output= Kp*error + Ki*integral + Kd*derivative;
-	output = kp * error + ki * integral;
+	output = kp_pi * error + ki_pi * integral;
 
 	//Scale PID output for PWM  (it has to be a value between 0-8v)
 	//output= (output*Vmax)/(226000*setpoint);
@@ -77,7 +81,7 @@ int32_t PiController::pid(float setpoint, float actual) {
 
 	preError = error;
 
-	output = kp * error + ki * integral + kd * derivative;
+	output = kp_pi * error + ki_pi * integral + kd_pi * derivative;
 
 
 	// From angular velocity to voltage

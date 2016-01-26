@@ -11,10 +11,17 @@
 #include "../Extern/Include.h"
 #include "../Extern/Extern.h"
 
-// Controller values
-#define KP 			0.026 		// Proportional gain
-#define KI 			0.0004		// Integral gain
-#define KD 			0.1182		// Derivative gain
+// Controller values for PI
+#define KP_PI 		0.026 		// Proportional gain
+#define KI_PI 		0.0004		// Integral gain
+#define KD_PI 		0.1182		// Derivative gain
+
+// Controller values for PID
+#define KP_PID 		0.026 		// Proportional gain
+#define KI_PID 		0.0004		// Integral gain
+#define KD_PID 		0.1182		// Derivative gain
+
+
 
 #define PWM_RES		1000     	// PWM resolution
 #define V_MAX 		7      	 	// [Volts] V max output of PWM
@@ -40,17 +47,17 @@ public:
 	int32_t pid(float setpoint, float actual);
 	/* Sets the proportional part of the controller*/
 	void setProportional(float kp){
-		this->kp = kp;
+		this->kp_pi = kp;
 	}
 
 	/* Sets the integral part of the controller*/
 	void setIntegral(float ki){
-		this->ki = ki;
+		this->ki_pi = ki;
 	}
 
 	/* Sets the derivative part of the controller*/
 	void setDerivative(float kp){
-		this->kp = kp;
+		this->kp_pi = kp;
 	}
 
 	/* Sets the error margin part of the controller*/
@@ -58,9 +65,16 @@ public:
 		this->epsilon = epsilon;
 	}
 
-	float kp;
-	float ki;
-	float kd;
+	// PI
+	float kp_pi;
+	float ki_pi;
+	float kd_pi;
+
+	//PID
+	float kp_pid;
+	float ki_pid;
+	float kd_pid;
+
 
 	float dt;
 	float epsilon;
