@@ -15,6 +15,29 @@ HAL_GPIO I2C_2_EN(GPIO_055);
 HAL_GPIO CS_XM(GPIO_032);     // Chip select Accelerometer and Magnetometer
 HAL_I2C I2C_2(I2C_IDX2);
 
+/*
+ * Stolen from
+ * Author:  Christoph Hagen
+ * Date:    January 7th, 2016
+ *
+ * This is a sample implementation of the ellipsoid fit approach.
+ * The values for the matrix and the offset vector are
+ * calculated by reading raw magnetometer values and feeding them
+ * into the matlab script as a csv file. It then calculates the
+ * necessary values and shows a plot of the calibration.
+ * Check the proccess_raw_mag_data.m file for more instructions
+ */
+
+/*
+ * The rotation matrix from the matlab script
+ */
+float el_ma[3][3] = { { 0.1739, 0.0017, 0.0016 }, { 0.0017, 0.1853, 0.0188 }, { 0.0016, 0.0188, 0.1570 } };
+
+/*
+ * The scale factors from the matlab script
+ */
+float el_sc[3] = { -23780, -11616, -3522 };
+
 IMU::IMU(Thread *caller, float sampleRate) {
 	// Reference to the caller thread to suspend it
 	this->caller = caller;
@@ -235,9 +258,22 @@ void IMU::magReadLSM303DLH() {
 	mag.yRAW = (int16_t) (((data[2] << 8) | data[3]));
 	mag.zRAW = (int16_t) (((data[4] << 8) | data[5]));
 
-	mag.x = (((mag.xRAW - magXMin) / magXDiff) * 2 - 1);
-	mag.y = (((mag.yRAW - magYMin) / magYDiff) * 2 - 1);
-	mag.z = (((mag.zRAW - magZMin) / magZDiff) * 2 - 1);
+	// Hard iron calobration
+//	mag.x = (((mag.xRAW - magXMin) / magXDiff) * 2 - 1);
+//	mag.y = (((mag.yRAW - magYMin) / magYDiff) * 2 - 1);
+//	mag.z = (((mag.zRAW - magZMin) / magZDiff) * 2 - 1);
+
+	// Soft iron calibration
+    float mv[3];
+    mv[0] = data[0] - el_sc[0];
+    mv[1] = data[1] - el_sc[1];
+    mv[2] = data[2] - el_sc[2];
+
+	/* Rotate and scale by multipliying with soft iron matrix */
+	mag.x = el_ma[0][0] * mv[0] + el_ma[0][1] * mv[1] + el_ma[0][2] * mv[2];
+	mag.y = el_ma[1][0] * mv[0] + el_ma[1][1] * mv[1] + el_ma[1][2] * mv[2];
+	mag.z = el_ma[2][0] * mv[0] + el_ma[2][1] * mv[1] + el_ma[2][2] * mv[2];
+
 }
 
 /*

@@ -24,7 +24,6 @@ void IR::init() {
 	sensor->init(channel);
 }
 
-
 float IR::read() {
 	float x = readInternal();
 	// y = A + Bx + Cx2;

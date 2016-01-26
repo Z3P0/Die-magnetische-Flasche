@@ -28,10 +28,10 @@ ThImuRead::ThImuRead(const char* name, Hbridge *flWheel) {
 	// Flags for reading/ printing
 	accPrint = false;
 	gyrPrint = false;
-	magPrint = false;
+	magPrint = true;
 	filPrint = false;
 	lightPrint = false;
-	solarPrint = true;
+	solarPrint = false;
 	irPrint = false;
 
 	flag = false;
@@ -175,6 +175,12 @@ void ThImuRead::run() {
 			// input value is just the gyro dz value!
 			duty = controller.pid(setPoint, ahrs.gY);
 
+
+			if (magPrint) {
+				sprintf(printOutput, "%d,%d,%d\r", imu.mag.xRAW, imu.mag.yRAW, imu.mag.zRAW);
+				PRINTF(printOutput);
+			}
+
 			// Print
 			if ((cnt++ > 30) && (send)) {
 				cnt = 0;
@@ -197,10 +203,10 @@ void ThImuRead::run() {
 					PRINTF(printOutput);
 				}
 
-				if (magPrint) {
-					sprintf(printOutput, "M x %.1f y %.1f z %.1f\r\n", imu.mag.x, imu.mag.y, imu.mag.z);
-					PRINTF(printOutput);
-				}
+//				if (magPrint) {
+//					sprintf(printOutput, "%d %d %d \r\n", imu.mag.xRAW, imu.mag.yRAW, imu.mag.zRAW);
+//					PRINTF(printOutput);
+//				}
 
 				if (filPrint) {
 					sprintf(printOutput, "MGr%.1f p %.1f y%.1f\r\n", ahrs.fR, ahrs.fP, ahrs.fY);
@@ -223,7 +229,7 @@ void ThImuRead::run() {
 //					PRINTF(printOutput);
 				}
 
-				if(irPrint){
+				if (irPrint) {
 					sprintf(printOutput, "IR1 %f\r\n", ir1.read());
 					PRINTF(printOutput);
 
