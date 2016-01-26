@@ -28,8 +28,10 @@ ThImuRead::ThImuRead(const char* name, Hbridge *flWheel) {
 	// Flags for reading/ printing
 	accPrint = false;
 	gyrPrint = false;
-	magPrint = true;
-	filPrint = false;
+	// This one is for calibration
+	magPrint = false;
+	// This is the normal stuff
+	filPrint = true;
 	lightPrint = false;
 	solarPrint = false;
 	irPrint = false;
@@ -173,7 +175,7 @@ void ThImuRead::run() {
 			//duty = controller.pi(setPoint, imu.gyr.dz);
 
 			// input value is just the gyro dz value!
-			duty = controller.pid(setPoint, ahrs.gY);
+			//duty = controller.pid(setPoint, ahrs.gY);
 
 
 			if (magPrint) {
@@ -209,10 +211,7 @@ void ThImuRead::run() {
 //				}
 
 				if (filPrint) {
-					sprintf(printOutput, "MGr%.1f p %.1f y%.1f\r\n", ahrs.fR, ahrs.fP, ahrs.fY);
-					PRINTF(printOutput);
-
-					sprintf(printOutput, "F r%.1f p %.1f y%.1f\r\n", ahrs.fR, ahrs.fP, ahrs.fY);
+					sprintf(printOutput, "G r%.1f p %.1f y%.1f\r\n", imu.gyr.r, imu.gyr.p, imu.gyr.y);
 					PRINTF(printOutput);
 
 					PRINTF("----------------------------\r\n");
