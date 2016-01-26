@@ -9,7 +9,12 @@
 #define SENSOR_ADC_SOLARPANNEL_H_
 #include "../../Extern/Include.h"
 
-#define RESISTANCE 	1.0
+#define R1		1.98 //[k Ohm]
+#define R2		8.0  //[k Ohm]
+
+#define R3		150.0 //[Ohm]
+#define R4		2.2   //[k Ohm]
+
 
 class SolarPannel {
 public:

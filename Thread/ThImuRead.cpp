@@ -7,7 +7,6 @@
 
 #include "ThImuRead.h"
 #include "../Define/Define.h"
-#include "../Sensor/I2C/IMU/IMU.h"
 #include "../Sensor/I2C/Lighsensor/Light.h"
 #include "../Sensor/ADC/IR.h"
 #include "../Sensor/ADC/SolarPannel.h"
@@ -18,6 +17,7 @@
 #include <stdio.h>
 
 ThImuRead::ThImuRead(const char* name, Hbridge *flWheel) {
+
 	// Read the battery values
 	// Current batteries(ADDR_BATT);
 	float batVal[2];
@@ -28,8 +28,10 @@ ThImuRead::ThImuRead(const char* name, Hbridge *flWheel) {
 	// Flags for reading/ printing
 	accPrint = false;
 	gyrPrint = false;
+
 	// This one is for calibration
 	magPrint = false;
+
 	// This is the normal stuff
 	filPrint = true;
 	lightPrint = false;
@@ -72,8 +74,8 @@ void ThImuRead::init() {
 }
 
 void ThImuRead::run() {
-	// Sample rate = 0.015 s
-	IMU imu(this, 0.015);
+
+	IMU imu(0.015, this);
 	imu.accSetDefaultValues();
 
 	// Sensors
@@ -118,154 +120,172 @@ void ThImuRead::run() {
 			ahrs.setAllValuesToZero();
 		}
 
-		// Magnetometer hard iron calibration with TC. Sets all AHRS values to zero.
+		// Magnetometer soft iron calibration with TC. Sets all AHRS values to zero.
 		if (magCalFlag) {
-			imu.magCalibrate();
-			ahrs.setAllValuesToZero();
-		}
+			//imu.magPrint4cal();
 
-		// Magnetometer soft iorn calibration with TC. Sets all AHRS values to zero.
-		if (magCalFlag) {
-			imu.magCalibrate();
-			ahrs.setAllValuesToZero();
-		}
+			// Read and print out values for the soft iron calibration
 
-		// Gyroscope calibration with TC. Sets all AHRS values to zero.
-		if (gyrCalFlag) {
-			imu.gyrCalibrate();
-			ahrs.setAllValuesToZero();
-		}
+			int cnt = 0;
+			while (cnt++ > SAMPLES_SOFTCAL) {
+				imu.magReadLSM303DLH();
 
-		// Change the alpha factor of the AHRS
-		if (changeAlphaFlag) {
-			PRINTF("AHRS: New alpha %f \r\n", (value / 100.00));
-			ahrs.setAlpha((value / 100.00));
-		}
-
-		// Controller setpoint change
-		if (epsilonFlag) {
-			controller.setEpsion((value / 1000.00));
-			PRINTF("Controller new epsilon value %f \r\n", controller.epsilon);
-		}
-
-		if (kdFlag) {
-			controller.setDerivative((value / 1000.00));
-			PRINTF("Controller new kd value %f \r\n", controller.ki);
-		}
-
-		if (kiFlag) {
-			controller.setIntegral((value / 1000.00));
-			PRINTF("Controller new ki value %f \r\n", controller.ki);
-		}
-
-		if (kpFlag) {
-			controller.setProportional((value / 1000.00));
-			PRINTF("Controller new kp value %f \r\n", controller.kp);
-		}
-
-		if (setPointFlag) {
-			this->setPoint = value;
-			PRINTF("New setpoint %f \r\n", this->setPoint);
-		}
-
-		flag = magCalFlag = gyrCalFlag = accCalFlag = changeAlphaFlag = setPointFlag = kpFlag = kdFlag = kiFlag = epsilonFlag = false;
-
-		// Inner read loop
-		while (1) {
-			// Read the Sensors
-			imu.accRead();
-			imu.gyrRead();
-			imu.magReadLSM303DLH();
-
-			// Filter the data
-			ahrs.filterUpdate2(&imu.acc, &imu.gyr, &imu.mag);
-
-			// Soft iron calibration value Print
-			if (softIrFlag) {
 				sprintf(printOutput, "%d,%d,%d\r", imu.mag.xRAW, imu.mag.yRAW, imu.mag.zRAW);
 				PRINTF(printOutput);
-
-				// Disables other print methods
-				cnt = 0;
 			}
-
-			// Print
-			if ((cnt++ > 30) && (send)) {
-				cnt = 0;
-
-				// Read Light sensor
-				if (lightPrint) {
-					ls.read();
-					sprintf(printOutput, "light ch1%d ch1%d\r\n", ls.ch0, ls.ch1);
-					PRINTF(printOutput);
-				}
-
-				// Print Magnetometer data
-				if (accPrint) {
-					sprintf(printOutput, "A x%.1f y%.1f z%.1f\r\n", imu.acc.x, imu.acc.y, imu.acc.z);
-					PRINTF(printOutput);
-				}
-
-				// Print Gyrometer data
-				if (gyrPrint) {
-					sprintf(printOutput, "G dx%.1f dy%.1f dz%.1f\r\n", imu.gyr.dx, imu.gyr.dy, imu.gyr.dz);
-					PRINTF(printOutput);
-				}
-
-				// Print Magnetometer data
-				if (magPrint) {
-					sprintf(printOutput, "%Raw x%d y%d z%d\r\n", imu.mag.xRAW, imu.mag.yRAW, imu.mag.zRAW);
-					PRINTF(printOutput);
-
-					sprintf(printOutput, "CAL x%d y%d z%d\r\n", imu.mag.x, imu.mag.y, imu.mag.z);
-					PRINTF(printOutput);
-				}
-
-				// Print fuison data
-				if (filPrint) {
-					sprintf(printOutput, "G r%.1f p %.1f y%.1f\r\n", imu.gyr.r, imu.gyr.p, imu.gyr.y);
-					PRINTF(printOutput);
-
-					PRINTF("----------------------------\r\n");
-
-					sprintf(printOutput, "F r%.1f p %.1f y%.1f\r\n", ahrs.fR, ahrs.fP, ahrs.fY);
-					PRINTF(printOutput);
-				}
-
-				// Print solar pannel data
-				if (solarPrint) {
-					sprintf(printOutput, "Solar vol: %.2f\r\n", solPan.getVoltage());
-					PRINTF(printOutput);
-
-					sprintf(printOutput, "Solar cur: %.1f\r\n", solPan.getCurrent());
-					PRINTF(printOutput);
-				}
-
-				// Print ir sensor data
-				if (irPrint) {
-					sprintf(printOutput, "IR1 %f\r\n", ir1.read());
-					PRINTF(printOutput);
-
-					sprintf(printOutput, "IR2 %f\r\n", ir2.read());
-					PRINTF(printOutput);
-				}
-			}
-
-			// input value is just the gyro dz value!
-			//duty = controller.pi(setPoint, imu.gyr.dz);
-
-			// Enables/disables motor controller
-			if (motorCtrl) {
-				flWheel->setDuty(duty);
-			} else {
-				flWheel->setDuty(0);
-			}
-
-			// For more performance just one flag to break out of the inner loop
-			if (flag)
-				break;
-
-			suspendCallerUntil(NOW()+15*MILLISECONDS);
+			ahrs.setAllValuesToZero();
 		}
 	}
+
+	// Magnetometer soft iorn calibration with TC. Sets all AHRS values to zero.
+	if (magCalFlag) {
+		imu.magCalibrate();
+		ahrs.setAllValuesToZero();
+	}
+
+	// Gyroscope calibration with TC. Sets all AHRS values to zero.
+	if (gyrCalFlag) {
+		imu.gyrCalibrate();
+		ahrs.setAllValuesToZero();
+	}
+
+	// Change the alpha factor of the AHRS
+	if (changeAlphaFlag) {
+		PRINTF("AHRS: New alpha %f \r\n", (value / 100.00));
+		ahrs.setAlpha((value / 100.00));
+	}
+
+	// Controller setpoint change
+	if (epsilonFlag) {
+		controller.setEpsion((value / 1000.00));
+		PRINTF("Controller new epsilon value %f \r\n", controller.epsilon);
+	}
+
+	if (kdFlag) {
+		controller.setDerivative((value / 1000.00));
+		PRINTF("Controller new kd value %f \r\n", controller.ki);
+	}
+
+	if (kiFlag) {
+		controller.setIntegral((value / 1000.00));
+		PRINTF("Controller new ki value %f \r\n", controller.ki);
+	}
+
+	if (kpFlag) {
+		controller.setProportional((value / 1000.00));
+		PRINTF("Controller new kp value %f \r\n", controller.kp);
+	}
+
+	if (setPointFlag) {
+		this->setPoint = value;
+		PRINTF("New setpoint %f \r\n", this->setPoint);
+	}
+
+	flag = magCalFlag = gyrCalFlag = accCalFlag = changeAlphaFlag = setPointFlag = kpFlag = kdFlag = kiFlag = epsilonFlag = false;
+
+	// Inner read loop
+	while (1) {
+		// Read the Sensors
+		imu.accRead();
+		imu.gyrRead();
+		imu.magReadLSM303DLH();
+
+		// Filter the data
+		ahrs.filterUpdate2(&imu.acc, &imu.gyr, &imu.mag);
+
+		// Soft iron calibration value Print
+		if (softIrFlag) {
+			sprintf(printOutput, "%d,%d,%d\r", imu.mag.xRAW, imu.mag.yRAW, imu.mag.zRAW);
+			PRINTF(printOutput);
+
+			// Disables other print methods
+			cnt = 0;
+		}
+
+		// Print
+		if ((cnt++ > 30) && (send)) {
+			cnt = 0;
+
+			// Read Light sensor
+			if (lightPrint) {
+				ls.read();
+				sprintf(printOutput, "light ch1%d ch1%d\r\n", ls.ch0, ls.ch1);
+				PRINTF(printOutput);
+			}
+
+			// Print Magnetometer data
+			if (accPrint) {
+				sprintf(printOutput, "A x%.1f y%.1f z%.1f\r\n", imu.acc.x, imu.acc.y, imu.acc.z);
+				PRINTF(printOutput);
+			}
+
+			// Print Gyrometer data
+			if (gyrPrint) {
+				sprintf(printOutput, "G dx%.1f dy%.1f dz%.1f\r\n", imu.gyr.dx, imu.gyr.dy, imu.gyr.dz);
+				PRINTF(printOutput);
+			}
+
+			// Print Magnetometer data
+			if (magPrint) {
+				sprintf(printOutput, "%Raw x%d y%d z%d\r\n", imu.mag.xRAW, imu.mag.yRAW, imu.mag.zRAW);
+				PRINTF(printOutput);
+
+				sprintf(printOutput, "CAL x%.1f y%.1f z%.1f\r\n", imu.mag.x, imu.mag.y, imu.mag.z);
+				PRINTF(printOutput);
+			}
+
+			// Print fuison data
+			if (filPrint) {
+				PRINTF("----------------------------\r\n");
+
+				sprintf(printOutput, "Y %.1f\r\n", ahrs.mY);
+				PRINTF(printOutput);
+
+//					sprintf(printOutput, "G r%.1f p %.1f y%.1f\r\n", imu.gyr.r, imu.gyr.p, imu.gyr.y);
+//					PRINTF(printOutput);
+
+				sprintf(printOutput, "G y%.1f\r\n", imu.gyr.y);
+				PRINTF(printOutput);
+
+				sprintf(printOutput, "F y%.1f\r\n", ahrs.yFus);
+				PRINTF(printOutput);
+			}
+
+			// Print solar pannel data
+			if (solarPrint) {
+				sprintf(printOutput, "Solar vol: %.2f\r\n", solPan.getVoltage());
+				PRINTF(printOutput);
+
+				sprintf(printOutput, "Solar cur: %.1f\r\n", solPan.getCurrent());
+				PRINTF(printOutput);
+			}
+
+			// Print ir sensor data
+			if (irPrint) {
+				sprintf(printOutput, "IR1 %f\r\n", ir1.read());
+				PRINTF(printOutput);
+
+				sprintf(printOutput, "IR2 %f\r\n", ir2.read());
+				PRINTF(printOutput);
+			}
+		}
+
+		// input value is just the gyro dz value!
+		//duty = controller.pi(setPoint, imu.gyr.dz);
+
+		// Enables/disables motor controller
+		if (motorCtrl) {
+			flWheel->setDuty(duty);
+		} else {
+			flWheel->setDuty(0);
+		}
+
+		// For more performance just one flag to break out of the inner loop
+		if (flag)
+			break;
+
+		suspendCallerUntil(NOW()+15*MILLISECONDS);
+	}
 }
+
+

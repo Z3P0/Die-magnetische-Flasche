@@ -74,7 +74,7 @@ public:
 	IMU_Mag mag;
 
 	// All Initial Measurement units are connected to i2c1
-	IMU(Thread *caller, float sampleRate);
+	IMU(float sampleRate, Thread *caller);
 	virtual ~IMU();
 	void errorDetection(int16_t nbrOfReceivedBytes, int8_t expectedNumber);
 	void resetValues();

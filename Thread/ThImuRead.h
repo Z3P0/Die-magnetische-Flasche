@@ -11,6 +11,7 @@
 #include "../Controller/PiController.h"
 #include "../Actuators/Hbridge.h"
 
+#define SAMPLES_SOFTCAL 15000
 
 class ThImuRead: public Thread {
 public:
@@ -18,7 +19,6 @@ public:
 	virtual ~ThImuRead();
 	void init();
 	void run();
-	void magCalibrate();
 	void gyrCalibrate();
 	void setAlpha(int alpha);
 

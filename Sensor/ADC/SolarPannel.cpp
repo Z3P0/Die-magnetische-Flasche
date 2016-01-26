@@ -38,5 +38,6 @@ float SolarPannel::getVoltage() {
 }
 
 float SolarPannel::getCurrent() {
-	return (((float)read(&chVoltage)/ 1240) / RESISTANCE);
+	//return (((float)read(&chVoltage)/ 1240) / RESISTANCE);
+	return 0;
 }
