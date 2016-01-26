@@ -125,12 +125,9 @@ void ThImuRead::run() {
 
 			// Read and print out values for the soft iron calibration
 			int cnt = 0;
-			PRINTF("Magnetometer calibration .....reset the commuication\r\n");
-			while(cnt < 5){
-				cnt++;
-				PRINTF("%d\r\n", (5-cnt));
-				suspendCallerUntil(NOW()+1*SECONDS);
-			}
+			PRINTF("Magnetometer calibration starts in 5 seconds.....reset the commuication\r\n");
+			suspendCallerUntil(NOW()+5*SECONDS);
+
 
 			while (cnt < SAMPLES_SOFTCAL) {
 				cnt++;
@@ -206,7 +203,7 @@ void ThImuRead::run() {
 			}
 
 			// Print
-			if ((cnt++ > 30) && (send)) {
+			if ((cnt++ > 15) && (send)) {
 				cnt = 0;
 
 				// Read Light sensor
