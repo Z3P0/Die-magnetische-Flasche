@@ -48,6 +48,7 @@ ThImuRead::ThImuRead(const char* name, Hbridge *flWheel) {
 	accCalFlag = false;
 	gyrCalFlag = false;
 	magCalFlag = false;
+	softIrFlag = false;
 
 	value = 0;				// Default value used for the TC
 
@@ -117,7 +118,13 @@ void ThImuRead::run() {
 			ahrs.setAllValuesToZero();
 		}
 
-		// Magnetometer calibration with TC. Sets all AHRS values to zero.
+		// Magnetometer hard iron calibration with TC. Sets all AHRS values to zero.
+		if (magCalFlag) {
+			imu.magCalibrate();
+			ahrs.setAllValuesToZero();
+		}
+
+		// Magnetometer soft iorn calibration with TC. Sets all AHRS values to zero.
 		if (magCalFlag) {
 			imu.magCalibrate();
 			ahrs.setAllValuesToZero();
@@ -165,22 +172,21 @@ void ThImuRead::run() {
 
 		// Inner read loop
 		while (1) {
+			// Read the Sensors
 			imu.accRead();
 			imu.gyrRead();
 			imu.magReadLSM303DLH();
 
+			// Filter the data
 			ahrs.filterUpdate2(&imu.acc, &imu.gyr, &imu.mag);
 
-			// input value is just the gyro dz value!
-			//duty = controller.pi(setPoint, imu.gyr.dz);
-
-			// input value is just the gyro dz value!
-			//duty = controller.pid(setPoint, ahrs.gY);
-
-
-			if (magPrint) {
+			// Soft iron calibration value Print
+			if (softIrFlag) {
 				sprintf(printOutput, "%d,%d,%d\r", imu.mag.xRAW, imu.mag.yRAW, imu.mag.zRAW);
 				PRINTF(printOutput);
+
+				// Disables other print methods
+				cnt = 0;
 			}
 
 			// Print
@@ -200,16 +206,22 @@ void ThImuRead::run() {
 					PRINTF(printOutput);
 				}
 
+				// Print Gyrometer data
 				if (gyrPrint) {
 					sprintf(printOutput, "G dx%.1f dy%.1f dz%.1f\r\n", imu.gyr.dx, imu.gyr.dy, imu.gyr.dz);
 					PRINTF(printOutput);
 				}
 
-//				if (magPrint) {
-//					sprintf(printOutput, "%d %d %d \r\n", imu.mag.xRAW, imu.mag.yRAW, imu.mag.zRAW);
-//					PRINTF(printOutput);
-//				}
+				// Print Magnetometer data
+				if (magPrint) {
+					sprintf(printOutput, "%Raw x%d y%d z%d\r\n", imu.mag.xRAW, imu.mag.yRAW, imu.mag.zRAW);
+					PRINTF(printOutput);
 
+					sprintf(printOutput, "CAL x%d y%d z%d\r\n", imu.mag.x, imu.mag.y, imu.mag.z);
+					PRINTF(printOutput);
+				}
+
+				// Print fuison data
 				if (filPrint) {
 					sprintf(printOutput, "G r%.1f p %.1f y%.1f\r\n", imu.gyr.r, imu.gyr.p, imu.gyr.y);
 					PRINTF(printOutput);
@@ -220,34 +232,39 @@ void ThImuRead::run() {
 					PRINTF(printOutput);
 				}
 
+				// Print solar pannel data
 				if (solarPrint) {
 					sprintf(printOutput, "Solar vol: %.2f\r\n", solPan.getVoltage());
 					PRINTF(printOutput);
 
-//					sprintf(printOutput, "Solar cur: %.1f\r\n", solPan.getCurrent());
-//					PRINTF(printOutput);
+					sprintf(printOutput, "Solar cur: %.1f\r\n", solPan.getCurrent());
+					PRINTF(printOutput);
 				}
 
+				// Print ir sensor data
 				if (irPrint) {
 					sprintf(printOutput, "IR1 %f\r\n", ir1.read());
 					PRINTF(printOutput);
 
 					sprintf(printOutput, "IR2 %f\r\n", ir2.read());
 					PRINTF(printOutput);
-
 				}
-
 			}
 
-			//enables/disables motor controller
+			// input value is just the gyro dz value!
+			//duty = controller.pi(setPoint, imu.gyr.dz);
+
+			// Enables/disables motor controller
 			if (motorCtrl) {
 				flWheel->setDuty(duty);
 			} else {
 				flWheel->setDuty(0);
 			}
 
+			// For more performance just one flag to break out of the inner loop
 			if (flag)
 				break;
+
 			suspendCallerUntil(NOW()+15*MILLISECONDS);
 		}
 	}

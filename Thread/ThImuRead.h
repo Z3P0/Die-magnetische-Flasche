@@ -93,6 +93,7 @@ private:
 	bool magCalFlag;
 	bool gyrCalFlag;
 	bool accCalFlag;
+	bool softIrFlag;
 
 	// AHRS change value
 	bool changeAlphaFlag;

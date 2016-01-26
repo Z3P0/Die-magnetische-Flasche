@@ -11,6 +11,8 @@
 #include "../../Define/Define.h"
 #include "../../Extern/Extern.h"
 
+#define MAXSAMPLES  4
+
 class IR {
 public:
 	IR(HAL_ADC * adc, ADC_CHANNEL cha);

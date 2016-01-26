@@ -36,7 +36,7 @@ ThImuRead imuRead("IMURead", &flWheel);
 //IR sensor: gets reference to ADC
 //IR irSensor(&ADC_1);
 //Mission thread: gets reference to IR sensor
-ThMission thMission("Mission", &irSensor, &irMotor);
+//ThMission thMission("Mission", &irSensor, &irMotor);
 ThCamera thCamera;
 
 ThTelecommand::ThTelecommand(const char* name) {
@@ -69,6 +69,8 @@ void ThTelecommand::run_binary() {
 		}
 		cmd = SerializationUtil::ReadInt32(out, 2);
 		//Commands with extra parameter
+
+// TODO What is that for!?
 		switch (cmd) {
 		case TRAC:
 		case PONT:
@@ -282,7 +284,7 @@ void ThTelecommand::exectue() {
 		break;
 
 	case (IRSM):
-		irSensor.sample(value);
+		//irSensor.sample(value);
 		break;
 
 	default:
