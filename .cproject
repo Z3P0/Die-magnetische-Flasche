@@ -190,11 +190,12 @@
 					</folderInfo>
 					<fileInfo id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.12578087.280217827" name="Light.h" rcbsApplicability="disable" resourcePath="Sensor/I2C/Lighsensor/Light.h" toolsToInvoke=""/>
 					<fileInfo id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.12578087.2062442764" name="Current.h" rcbsApplicability="disable" resourcePath="Sensor/I2C/Current/Current.h" toolsToInvoke=""/>
+					<fileInfo id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.12578087.1781942432" name="ThCamera.h" rcbsApplicability="disable" resourcePath="Thread/ThCamera.h" toolsToInvoke=""/>
 					<fileInfo id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.12578087.851315871" name="ThImuRead.h" rcbsApplicability="disable" resourcePath="Thread/ThImuRead.h" toolsToInvoke=""/>
 					<fileInfo id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.12578087.1127741855" name="ThSolar.h" rcbsApplicability="disable" resourcePath="Thread/ThSolar.h" toolsToInvoke=""/>
 					<fileInfo id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.12578087.653813445" name="ThTelecommand.h" rcbsApplicability="disable" resourcePath="Thread/ThTelecommand.h" toolsToInvoke=""/>
 					<sourceEntries>
-						<entry excluding="Sensor/OV7670|Sensor/Camera|Sensor/ThImuRead.cpp|Template.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="Thread/ThCamera.h|Thread/ThCamera.cpp|Sensor/OV7670|Sensor/Camera|Sensor/ThImuRead.cpp|Template.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

@@ -11,7 +11,7 @@
 #include "../Controller/PiController.h"
 #include "../Actuators/Hbridge.h"
 
-#define SAMPLES_SOFTCAL 15000
+#define SAMPLES_SOFTCAL 1500
 
 class ThImuRead: public Thread {
 public:

@@ -29,7 +29,7 @@ Hbridge flWheel(1000, 1000, &HBRIDGE_B, &HBRIDGE_B_INA, &HBRIDGE_B_INB);
 Hbridge irMotor(1000, 1000, &HBRIDGE_C, &HBRIDGE_C_INA, &HBRIDGE_C_INB);
 
 /* The solar thread gets a reverence to the thermal knife bridge*/
-//ThSolar thSolar("Solar", &thKnife);
+ThSolar thSolar("Solar", &thKnife);
 /* The IMU thread gets the reference to flywheel*/
 ThImuRead imuRead("IMURead", &flWheel);
 
@@ -37,7 +37,7 @@ ThImuRead imuRead("IMURead", &flWheel);
 //IR irSensor(&ADC_1);
 //Mission thread: gets reference to IR sensor
 //ThMission thMission("Mission", &irSensor, &irMotor);
-ThCamera thCamera;
+//ThCamera thCamera;
 
 ThTelecommand::ThTelecommand(const char* name) {
 	cmd = value = 0;
@@ -68,9 +68,9 @@ void ThTelecommand::run_binary() {
 			out[i] = uart_stdout.getcharNoWait();
 		}
 		cmd = SerializationUtil::ReadInt32(out, 2);
-		//Commands with extra parameter
 
-// TODO What is that for!?
+
+		//Commands with extra parameter
 		switch (cmd) {
 		case TRAC:
 		case PONT:
@@ -220,8 +220,8 @@ void ThTelecommand::exectue() {
 		}
 		break;
 
+		//Reset the hole system!
 	case (RESE):
-		PRINTF("TC: TODO find a method to reset the S/C\r\n");
 		hwResetAndReboot();
 		break;
 
@@ -259,7 +259,7 @@ void ThTelecommand::exectue() {
 
 	case (DEPL):
 		//No need for a extra print command!
-		//thSolar.resume();
+		thSolar.resume();
 		break;
 
 	case (FSUN):
@@ -268,7 +268,7 @@ void ThTelecommand::exectue() {
 
 	case (PICT):
 		//PRINTF("TC: TODO picture mode");
-                thCamera.captureAndSend();
+        // thCamera.captureAndSend();
 		break;
 
 	case (PONT):
