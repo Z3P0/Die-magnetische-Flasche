@@ -93,16 +93,7 @@ int32_t PiController::pid(float setpoint, float actual) {
 	preError = error;
 
 	//PID
-	output = kp_pid * error + ki_pid * integral + kd_pid * derivative;
-
-
-	//output = kp_pid * error + ki_pid * integral;
-
-	// Change to pd
-	//output = kp_pid + kd_pid * derivative;
-
-// From angular velocity to voltage
-// output = ABS(output);
+	output = -(kp_pid * error + ki_pid * integral + kd_pid * derivative);
 
 // Saturation filter
 	if (output > V_MAX)

@@ -18,8 +18,8 @@
 
 // Controller values for PID
 #define KP_PID 		0.084 		// Proportional gain
-#define KI_PID 		0.000443	// Integral gain
-#define KD_PID 		0.01		// Derivative gain
+#define KI_PID 		0.05 		// Integral gain
+#define KD_PID 		0.3			// Derivative gain
 
 #define PWM_RES		1000     	// PWM resolution
 #define V_MAX 		5      	 	// [Volts] V max output of PWM
@@ -56,8 +56,8 @@ public:
 	}
 
 	/* Sets the derivative part of the controller*/
-	void setDerivative(float kp) {
-		this->kp_pid = kp;
+	void setDerivative(float kd) {
+		this->kd_pid = kd;
 	}
 
 	/* Sets the error margin part of the controller*/

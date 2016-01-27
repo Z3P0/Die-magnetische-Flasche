@@ -71,14 +71,14 @@ void AHRS::filterUpdate2(IMU_Acc* acc, IMU_Gyro* gyr, IMU_Mag* mag) {
 }
 
 void AHRS::simplePredict() {
-	float diff = yFus = pre_yFus;
-
-	float k = ABS(diff / yFus);
-
-	yFusPre = pre_yFus + yFus;
-
-	// Prediction of the new value
-	pre_yFus += (yFus * sampleRate);
+//	float di	ff = yFus - pre_yFus;
+//
+//	float k = ABS(diff / yFus);
+//
+//	yFusPre = pre_yFus + yFus;
+//
+//	// Prediction of the new value
+//	pre_yFus += (yFus * sampleRate);
 }
 
 void AHRS::setAlpha(float alpha) {

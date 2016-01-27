@@ -32,16 +32,12 @@ HAL_I2C I2C_2(I2C_IDX2);
  * The rotation matrix from the matlab script
  */
 
-float el_ma[3][3] = { {    4.3959,   -0.1296,    1.3141 },
-					  {    -0.1296,    3.1853,   -0.1557 },
-					  {    1.3141,   -0.1557,    5.4526 } };
+float el_ma[3][3] = { { 4.2315, -0.6165, 0.0568 }, { -0.6165, 4.8364, -2.3262 }, { 0.0568, -2.3262, 23.8658 } };
 
 /*
  * The scale factors from the matlab script
  */
-float el_sc[3] = {  -363.0660,   39.7030, -100.4199 };
-
-
+float el_sc[3] = { -314.3331, 60.4992, -451.8949 };
 
 IMU::IMU(float sampleRate, Thread *caller) {
 	// Reference to the caller thread to suspend it
