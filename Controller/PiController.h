@@ -17,16 +17,16 @@
 //#define KD_PI 		0.1182		// Derivative gain
 
 // Controller values for PID
-#define KP_PID 		0.05		// Proportional gain
-#define KI_PID 		0.05 		// Integral gain
-#define KD_PID 		0.3			// Derivative gain
+#define KP_PID 		0.1			// Proportional gain  0.08
+#define KI_PID 		0.03 		// Integral gain  0.03
+#define KD_PID 		0.05		// Derivative gain 0.0
 
 #define PWM_RES		1000     	// PWM resolution
 #define V_MAX 		5      	 	// [Volts] V max output of PWM
 #define V_MIN		-5			// [Volts] V max output of PWM
 #define MIN 		0      	 	// [Volts] V max output of PWM
 #define V_MAX_HBrdg	9     		// [Volts] V max that should be applied to the H-bridge.
-#define EPSILON 	0.4    		// [Degree] Steady state error margin
+#define EPSILON_I	0.3
 
 
 class PiController {
@@ -62,7 +62,7 @@ public:
 
 	/* Sets the error margin part of the controller*/
 	void setEpsion(float epsilon) {
-		this->epsilon = epsilon;
+		this->epsilonI = epsilon;
 	}
 
 	// PI
@@ -76,8 +76,7 @@ public:
 	float kd_pid;
 
 	float dt;
-	float epsilon;
-
+	float epsilonI;
 
 	float error;
 	float integral;

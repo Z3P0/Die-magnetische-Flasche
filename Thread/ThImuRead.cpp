@@ -160,7 +160,7 @@ void ThImuRead::run() {
 		// Controller setpoint change
 		if (epsilonFlag) {
 			controller.setEpsion((value / 1000.00));
-			PRINTF("Controller new epsilon value %f \r\n", controller.epsilon);
+			PRINTF("Controller new epsilon value %f \r\n", controller.epsilonI);
 		}
 
 		if (kdFlag) {
@@ -283,7 +283,7 @@ void ThImuRead::run() {
 					PRINTF("----------------------------\r\n\n\n");
 					PRINTF("Duty %d set %.1f acu %.1f \r\n", duty, setPoint, ahrs.yFus);
 					PRINTF("p: %.7f i:%.7f d%.7f \r\n", controller.kp_pid, controller.ki_pid, controller.kd_pid );
-					PRINTF("e: %.1f i:%.1f d%.1f \r\n", controller.error, controller.integral ,controller.derivative );
+					PRINTF("p: %.1f i:%.1f d%.1f \r\n", (controller.error * controller.kd_pid), (controller.integral * controller.ki_pid ),(controller.derivative * controller.kd_pid));
 
 					if (motorCtrl) {
 						PRINTF("---->ON!\r\n");
@@ -294,7 +294,7 @@ void ThImuRead::run() {
 			}
 
 			// input value is just the gyro dz value!
-			duty = controller.pid(setPoint, ahrs.yFus);
+			duty = controller.pi(setPoint, imu.gyr.dx);
 
 			// Enables/disables motor controller
 			if (motorCtrl) {

@@ -20,7 +20,8 @@ PiController::PiController() {
 	ki_pid = KI_PID;
 	kd_pid = KD_PID;
 
-	epsilon = EPSILON;
+	epsilonI = EPSILON_I;
+
 	factor = (PWM_RES / V_MAX_HBrdg);     // PWM Resolution /V_MAX
 	output = 0;
 
@@ -44,7 +45,7 @@ unsigned int PiController::pi(float setpoint, float actual) {
 	error = setpoint - actual;
 
 	//In case error is too small then stop integration
-	if (ABS(error) > epsilon)
+	if (ABS(error) > epsilonI)
 		integral = integral + error * dt;
 
 	//derivative= (error - pre_error)/dt;
@@ -84,11 +85,15 @@ int32_t PiController::pid(float setpoint, float actual) {
 	}
 
 	//In case error is too small then stop integration
-	if (ABS(error) > epsilon)
+	if (ABS(error) > epsilonI)
 		integral = integral + error * dt;
 
 
-	derivative = (error - preError) / dt;
+
+//	//In case error is too small then stop derivative
+//	if (ABS(error) > epsilonD)
+		derivative = (error - preError) / dt;
+
 
 	preError = error;
 
