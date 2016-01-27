@@ -20,8 +20,7 @@ PiController::PiController() {
 	ki_pid = KI_PID;
 	kd_pid = KD_PID;
 
-	epsilon1 = EPSILON1;
-	epsilon2 = EPSILON2;
+	epsilon = EPSILON;
 	factor = (PWM_RES / V_MAX_HBrdg);     // PWM Resolution /V_MAX
 	output = 0;
 
@@ -45,7 +44,7 @@ unsigned int PiController::pi(float setpoint, float actual) {
 	error = setpoint - actual;
 
 	//In case error is too small then stop integration
-	if (ABS(error) > epsilon1)
+	if (ABS(error) > epsilon)
 		integral = integral + error * dt;
 
 	//derivative= (error - pre_error)/dt;
@@ -76,21 +75,31 @@ int32_t PiController::pid(float setpoint, float actual) {
 
 	//Calculate PID
 	error = setpoint - actual;
-	if (error > 0) {
-		// In case error is too small then stop integration
-		if (ABS(error) > epsilon1)
-			integral = integral + error * dt;
-	} else {
-		if (ABS(error) > epsilon2)
-			integral = integral + error * dt;
+
+	// decides the spinning direction
+	if (error >= 180) {
+		error -= 360;
+	} else if (error < -180) {
+		error += 360;
 	}
+
+	//In case error is too small then stop integration
+	if (ABS(error) > epsilon)
+		integral = integral + error * dt;
+
+
 	derivative = (error - preError) / dt;
 
 	preError = error;
 
-//Change all ki values to pid
+	//PID
 	output = kp_pid * error + ki_pid * integral + kd_pid * derivative;
-//output = kp_pid * error + ki_pid * integral;
+
+
+	//output = kp_pid * error + ki_pid * integral;
+
+	// Change to pd
+	//output = kp_pid + kd_pid * derivative;
 
 // From angular velocity to voltage
 // output = ABS(output);
@@ -104,3 +113,4 @@ int32_t PiController::pid(float setpoint, float actual) {
 // Duty cycle
 	return (output * factor);
 }
+

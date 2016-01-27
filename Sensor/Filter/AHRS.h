@@ -23,10 +23,15 @@ public:
 	void setAlpha(float alpha);
 	void setAllValuesToZero();
 	void setGyrYawToMagYaw();
+	void simplePredict();
 
 	float rFus;
 	float pFus;
 	float yFus;
+	float yFusPre;
+
+	// simple predict variables
+	float pre_yFus;		// predicted value
 
 	float gx;
 	float gy;

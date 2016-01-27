@@ -28,9 +28,16 @@
 #define LIGHT_ADDRESS			0x39
 #define CTRL_REG		    	(0x00| 0x80)
 #define POWER_UP				0x03
+//---------------------------
+#define CTR_REG1				(0x01| 0x80)
+// Low gain simple
+// Integration time 101 ms
+
 
 #define CH0_DATA_LOW          	(0x0C| 0xA0)	// Channel 0: Visible + IR light
-#define CH1_DATA_LOW          	(0xAE| 0xA0) 	// Channel 1: IR light
+#define CH1_DATA_LOW          	(0x0E| 0xA0) 	// Channel 1: IR light
+
+
 
 class Light {
 public:

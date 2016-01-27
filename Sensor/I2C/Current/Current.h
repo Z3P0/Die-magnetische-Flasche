@@ -52,11 +52,11 @@
 
 
 // The address of the first current sensor, which gives the total current from the battery
-#define ADDR_BATT   		0b1000000 	// Battery current
-#define ADDR_HB_A			0b1000001	// H-bridge A
-#define ADDR_HB_B			0b1000010	// H-bridge B
-#define ADDR_HB_C			0b1000011	// H-bridge C
-#define ADDR_HB_D			0b1000100	// H-bridge D
+#define ADDR_BATT   		0b01000000 	// Battery current
+#define ADDR_HB_A			0b01000001	// H-bridge A
+#define ADDR_HB_B			0b01000010	// H-bridge B
+#define ADDR_HB_C			0b01000011	// H-bridge C
+#define ADDR_HB_D			0b01000100	// H-bridge D
 
 struct CurrentValues {
 	float 	power;		// [W]
@@ -69,11 +69,10 @@ public:
 	// return [0] power; return [1] current
 	void getPowerCurrent(float *values);
 	virtual ~Current();
-
-private:
 	// Read raw vales
 	int8_t read();
 
+private:
 	// The register addresses of the INA219 current sensor
 	// Every register has 2 bytes of data, so two bytes need to be sent over i2c
 	const uint8_t CONFIG_REG[1] = { CONFIGURATION_REG_ADDR };

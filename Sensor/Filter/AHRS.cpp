@@ -24,6 +24,10 @@ AHRS::AHRS(float sampleRate) {
 	rFus = 0;
 	pFus = 0;
 	yFus = 0;
+
+	alpha = 0;
+	pre_yFus = 0;
+
 }
 
 AHRS::~AHRS() {
@@ -57,12 +61,24 @@ void AHRS::filterUpdate2(IMU_Acc* acc, IMU_Gyro* gyr, IMU_Mag* mag) {
 	pFus = (0.3 * acc->p + 0.7 * gyr->p);
 	yFus = (0.85 * gyr->y + 0.15 * mY);
 
-	yFus = ABS(yFus);
-	int n = (int) (yFus / 360);
+	int n = (int) (ABS(yFus) / 360);
 
 	if (yFus > 360)
 		yFus -= n * 360;
+	else if (yFus < 0)
+		yFus += (n+1) * 360;
 
+}
+
+void AHRS::simplePredict() {
+	float diff = yFus = pre_yFus;
+
+	float k = ABS(diff / yFus);
+
+	yFusPre = pre_yFus + yFus;
+
+	// Prediction of the new value
+	pre_yFus += (yFus * sampleRate);
 }
 
 void AHRS::setAlpha(float alpha) {

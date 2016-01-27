@@ -35,6 +35,7 @@ ThImuRead::ThImuRead(const char* name, Hbridge *flWheel) {
 	// This is the normal stuff
 	filPrint = false;
 	lightPrint = false;
+	currePrint = false;
 	solarPrint = false;
 	irPrint = false;
 	motorPrint = true;
@@ -92,6 +93,9 @@ void ThImuRead::run() {
 	// Solar panel object for voltage and current
 	SolarPannel solPan(&ADC_1, ADC_CHANNEL_SOL_A, ADC_CHANNEL_SOL_V);
 	solPan.init();
+
+	// Current
+	Current bat(ADDR_BATT);
 
 	char printOutput[80];
 
@@ -156,12 +160,12 @@ void ThImuRead::run() {
 		// Controller setpoint change
 		if (epsilonFlag) {
 			controller.setEpsion((value / 1000.00));
-			PRINTF("Controller new epsilon value %f \r\n", controller.epsilon1);
+			PRINTF("Controller new epsilon value %f \r\n", controller.epsilon);
 		}
 
 		if (kdFlag) {
 			controller.setDerivative((value / 1000.00));
-			PRINTF("Controller new kd value %f \r\n", controller.ki_pid);
+			PRINTF("Controller new kd value %f \r\n", controller.kd_pid);
 		}
 
 		if (kiFlag) {
@@ -248,6 +252,14 @@ void ThImuRead::run() {
 					sprintf(printOutput, "F y%.1f\r\n", ahrs.yFus);
 					PRINTF(printOutput);
 				}
+
+				// Print current sensor
+				if(currePrint){
+					bat.read();
+					//sprintf(printOutput, "Current ", bat.Current())
+
+				}
+
 
 				// Print solar pannel data
 				if (solarPrint) {

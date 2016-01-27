@@ -33,27 +33,27 @@ int8_t Current::read() {
 	uint8_t data[2];
 
 	// Read the calibration register
-	if (I2C_1.writeRead(adress, CALIBRATION_REG, 2, data, 2) != 2)
+	if (I2C_1.writeRead(adress, CALIBRATION_REG, 1, data, 2) != 2)
 		return -1;
 	raw_calReg = (int16_t) (data[0] << 8 | data[1]);
 
 	// Read the shunt register
-	if (I2C_1.writeRead(adress, SHUNT_REG, 2, data, 2) != 2)
+	if (I2C_1.writeRead(adress, SHUNT_REG, 1, data, 2) != 2)
 		return -1;
 	raw_shunt_v = (int16_t) (data[0] << 8 | data[1]);
 
 	// Read the bus voltage register
-	if (I2C_1.writeRead(adress, BUS_V_REG, 2, data, 2) != 2)
+	if (I2C_1.writeRead(adress, BUS_V_REG, 1, data, 2) != 2)
 		return -1;
 	raw_bus_v = (int16_t) (data[0] << 8 | data[1]);
 
 	// Read the power voltage register
-	if (I2C_1.writeRead(adress, POWER_V_REG, 2, data, 2) != 2)
+	if (I2C_1.writeRead(adress, POWER_V_REG, 1, data, 2) != 2)
 		return -1;
 	raw_power_v = (int16_t) (data[0] << 8 | data[1]);
 
 	// Read the current register
-	if (I2C_1.writeRead(adress, CURRRENT_REG, 2, data, 2) != 2)
+	if (I2C_1.writeRead(adress, CURRRENT_REG, 1, data, 2) != 2)
 		return -1;
 	raw_current = (int16_t) (data[0] << 8 | data[1]);
 

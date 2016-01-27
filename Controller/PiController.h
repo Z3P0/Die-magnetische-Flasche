@@ -23,11 +23,11 @@
 
 #define PWM_RES		1000     	// PWM resolution
 #define V_MAX 		5      	 	// [Volts] V max output of PWM
-#define V_MIN		-2			// [Volts] V max output of PWM
+#define V_MIN		-5			// [Volts] V max output of PWM
 #define MIN 		0      	 	// [Volts] V max output of PWM
 #define V_MAX_HBrdg	9     		// [Volts] V max that should be applied to the H-bridge.
-#define EPSILON1 	5.0    		// [Degree] Steady state error margin
-#define EPSILON2    10.0        // [Degree] Steady state error margin
+#define EPSILON 	0.4    		// [Degree] Steady state error margin
+
 
 class PiController {
 
@@ -47,22 +47,22 @@ public:
 	int32_t pid(float setpoint, float actual);
 	/* Sets the proportional part of the controller*/
 	void setProportional(float kp) {
-		this->kp_pi = kp;
+		this->kp_pid = kp;
 	}
 
 	/* Sets the integral part of the controller*/
 	void setIntegral(float ki) {
-		this->ki_pi = ki;
+		this->ki_pid = ki;
 	}
 
 	/* Sets the derivative part of the controller*/
 	void setDerivative(float kp) {
-		this->kp_pi = kp;
+		this->kp_pid = kp;
 	}
 
 	/* Sets the error margin part of the controller*/
 	void setEpsion(float epsilon) {
-		this->epsilon1 = epsilon;
+		this->epsilon = epsilon;
 	}
 
 	// PI
@@ -76,8 +76,8 @@ public:
 	float kd_pid;
 
 	float dt;
-	float epsilon1;
-	float epsilon2;
+	float epsilon;
+
 
 	float error;
 	float integral;

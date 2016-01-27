@@ -86,6 +86,7 @@ private:
 	bool gyrPrint;
 	bool magPrint;
 	bool filPrint;
+	bool currePrint;
 	bool solarPrint;
 	bool irPrint;
 	bool motorPrint;
