@@ -16,8 +16,9 @@
 #include "../Sensor/I2C/Current/Current.h"
 #include <stdio.h>
 
-ThImuRead::ThImuRead(const char* name, Hbridge *flWheel) {
+ThImuRead::ThImuRead(const char* name, Hbridge *flWheel, AHRS *ahrs) {
 
+	this->ahrs = ahrs;
 	// Read the battery values
 	// Current batteries(ADDR_BATT);
 	float batVal[2];
@@ -33,13 +34,13 @@ ThImuRead::ThImuRead(const char* name, Hbridge *flWheel) {
 	magPrint = false;
 
 	// This is the normal stuff
-	filPrint = false;
+	filPrint = true;
 	lightPrint = false;
 	currePrint = false;
 	solarPrint = false;
 	irPrint = false;
 	motorPrintPos = false;
-	motorPrintVel = true,
+	motorPrintVel = false,
 
 	flag = false;
 	changeAlphaFlag = false;
@@ -76,7 +77,6 @@ void ThImuRead::init() {
 }
 
 void ThImuRead::run() {
-
 	IMU imu(0.015, this);
 	imu.accSetDefaultValues();
 
@@ -106,7 +106,6 @@ void ThImuRead::run() {
 
 	float eulAng[3];
 
-	AHRS ahrs(0.01);
 	char sprintOut[100];
 
 	// Sample time set to 15 Milliseconds
@@ -121,7 +120,7 @@ void ThImuRead::run() {
 		// Accelerometer calibration with TC. Sets all AHRS values to zero.
 		if (accCalFlag) {
 			imu.accCalibrate();
-			ahrs.setAllValuesToZero();
+			ahrs->setAllValuesToZero();
 		}
 
 		// Magnetometer soft iron calibration with TC. Sets all AHRS values to zero.
@@ -143,19 +142,19 @@ void ThImuRead::run() {
 
 			// Suspend the print so that the user can store the values;
 			suspendCallerUntil(NOW()+15*SECONDS);
-			ahrs.setAllValuesToZero();
+			ahrs->setAllValuesToZero();
 		}
 
 		// Gyroscope calibration with TC. Sets all AHRS values to zero.
 		if (gyrCalFlag) {
 			imu.gyrCalibrate();
-			ahrs.setAllValuesToZero();
+			ahrs->setAllValuesToZero();
 		}
 
 		// Change the alpha factor of the AHRS
 		if (changeAlphaFlag) {
 			PRINTF("AHRS: New alpha %f \r\n", (value / 100.00));
-			ahrs.setAlpha((value / 100.00));
+			ahrs->setAlpha((value / 100.00));
 		}
 
 		// Controller setpoint change
@@ -194,7 +193,7 @@ void ThImuRead::run() {
 			imu.magReadLSM303DLH();
 
 			// Filter the data
-			ahrs.filterUpdate2(&imu.acc, &imu.gyr, &imu.mag);
+			ahrs->filterUpdate2(&imu.acc, &imu.gyr, &imu.mag);
 
 			// Soft iron calibration value Print
 			if (softIrFlag) {
@@ -241,7 +240,7 @@ void ThImuRead::run() {
 				if (filPrint) {
 					PRINTF("----------------------------\r\n");
 
-					sprintf(printOutput, "Y %.1f\r\n", ahrs.mY);
+					sprintf(printOutput, "Y %.1f\r\n", ahrs->mY);
 					PRINTF(printOutput);
 
 //					sprintf(printOutput, "G r%.1f p %.1f y%.1f\r\n", imu.gyr.r, imu.gyr.p, imu.gyr.y);
@@ -250,7 +249,7 @@ void ThImuRead::run() {
 					sprintf(printOutput, "G y%.1f\r\n", imu.gyr.y);
 					PRINTF(printOutput);
 
-					sprintf(printOutput, "F y%.1f\r\n", ahrs.yFus);
+					sprintf(printOutput, "F y%.1f\r\n", ahrs->yFus);
 					PRINTF(printOutput);
 				}
 
@@ -281,7 +280,7 @@ void ThImuRead::run() {
 
 				if (motorPrintPos) {
 					PRINTF("----------POSITION---------------\r\n\n\n");
-					PRINTF("Duty %d set %.1f acu %.1f \r\n", duty, setPoint, ahrs.yFus);
+					PRINTF("Duty %d set %.1f acu %.1f \r\n", duty, setPoint, ahrs->yFus);
 					PRINTF("p: %.7f i:%.7f d%.7f \r\n", controller.kp_pid, controller.ki_pid, controller.kd_pid);
 					PRINTF("p: %.1f i:%.1f d%.1f \r\n", (controller.error * controller.kd_pid), (controller.integral * controller.ki_pid), (controller.derivative * controller.kd_pid));
 

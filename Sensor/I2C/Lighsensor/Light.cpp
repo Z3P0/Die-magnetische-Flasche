@@ -10,7 +10,6 @@
 #include "../../../Extern/Extern.h"
 
 Light::Light() {
-	init();
 }
 
 Light::~Light() {}

@@ -26,11 +26,12 @@ void ThTelemetry::init() {
 void ThTelemetry::run() {
 
 	// Current
-	Current batteries(ADDR_BATT);
-
+	//Current batteries(ADDR_BATT);
 	char printftOut[80];
 
-	TIME_LOOP(NOW(), MILLISECONDS*100)
+	suspendCallerUntil(NOW() + 8*SECONDS);
+
+	TIME_LOOP(NOW(), MILLISECONDS*1000)
 	{
 		BlueLED.setPins(~BlueLED.readPins());
 #ifdef PROTOCOL_BINARY
@@ -44,19 +45,19 @@ void ThTelemetry::run() {
 		buff[3] = 0x01;
 
 		// Roll
-		SerializationUtil::WriteInt((int16_t) (ahrs->rFus * 1000), buff, 4);
+		SerializationUtil::WriteInt((int16_t) (ahrs->rFus), buff, 4);
 
 		// Pitch
-		SerializationUtil::WriteInt((int16_t) (ahrs->pFus * 1000), buff, 6);
+		SerializationUtil::WriteInt((int16_t) (ahrs->pFus), buff, 6);
 
 		// Yaw
-		SerializationUtil::WriteInt((int16_t) (ahrs->rFus * 1000), buff, 8);
+		SerializationUtil::WriteInt((int16_t) (ahrs->yFus), buff, 8);
 
 		// Batteries voltage
-		SerializationUtil::WriteInt((int16_t) (batteries.getVoltage() * 1000), buff, 10);
+		//SerializationUtil::WriteInt((int16_t) (batteries.getVoltage() * 1000), buff, 10);
 
 		// Batteries current
-		SerializationUtil::WriteInt((int16_t) (batteries.getCurrent() * 1000), buff, 12);
+		//SerializationUtil::WriteInt((int16_t) (batteries.getCurrent() * 1000), buff, 12);
 
 		// Panal voltage
 		SerializationUtil::WriteInt((int16_t) (solPan->getVoltage() * 1000), buff, 14);
@@ -77,14 +78,14 @@ void ThTelemetry::run() {
 			;
 		BT_Semaphore.leave();
 #else
-#endif
+
 		// Filtered angels Roll, Pitch, Yaw
-		sprintf(printftOut, "r: %.1f° p: %.1f° y: %.1f°\r\n", ahrs->fR, ahrs->fP ,ahrs->fY);
+		sprintf(printftOut, "r: %.1f deg p: %.1fdeg y: %.1fdeg\r\n", ahrs->rFus, ahrs->pFus ,ahrs->yFus);
 		PRINTF(printftOut);
 
 		// Batteries voltage & current
-		sprintf(printftOut, "Batteries %.1f[V] %.1f[A]\r\n", batteries.getVoltage(), batteries.getCurrent());
-		PRINTF(printftOut);
+		//sprintf(printftOut, "Batteries %.1f[V] %.1f[A]\r\n", batteries.getVoltage(), batteries.getCurrent());
+		//PRINTF(printftOut);
 
 		//Panal voltage & current
 		sprintf(printftOut, "Solar pannels %.1f[V]  %.1f[V]\r\n", solPan->getCurrent(), solPan->getVoltage());
@@ -95,8 +96,7 @@ void ThTelemetry::run() {
 		PRINTF(printftOut);
 
 		//operation mode
-
-
+#endif
 
 	}
 

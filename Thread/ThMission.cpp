@@ -78,7 +78,7 @@ void ThMission::run(){
 			//Unlock bluetooth
 			BT_Semaphore.leave();
 #else
-			PRINTF("Distance (cm): %f\r\n", ir);
+			PRINTF("Distance (cm): %f\r\n", ir1);
 			PRINTF("Height (time ratio): %f\r\n", h);
 #endif
 

@@ -10,12 +10,13 @@
 #include "../Extern/Include.h"
 #include "../Controller/PiController.h"
 #include "../Actuators/Hbridge.h"
+#include "../Sensor/Filter/AHRS.h"
 
 #define SAMPLES_SOFTCAL 1500
 
 class ThImuRead: public Thread {
 public:
-	ThImuRead(const char* name, Hbridge *flWheel);
+	ThImuRead(const char* name, Hbridge *flWheel, AHRS *ahrs);
 	virtual ~ThImuRead();
 	void init();
 	void run();
@@ -76,6 +77,8 @@ public:
 	}
 
 private:
+
+	AHRS *ahrs;
 	bool send;
 
 	bool flag;	 // Flag to leave the main loop

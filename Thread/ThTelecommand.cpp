@@ -42,7 +42,7 @@ Hbridge irMotor(1000, 1000, &HBRIDGE_C, &HBRIDGE_C_INA, &HBRIDGE_C_INB);
 /* The solar thread gets a reverence to the thermal knife bridge*/
 ThSolar thSolar("Solar", &thKnife);
 /* The IMU thread gets the reference to flywheel*/
-ThImuRead imuRead("IMURead", &flWheel);
+ThImuRead imuRead("IMURead", &flWheel,  &ahrs);
 
 //IR sensor: gets reference to ADC
 IR irSensor1(&ADC_1, ADC_CHANNEL_IR1);
@@ -50,7 +50,7 @@ IR irSensor2(&ADC_1, ADC_CHANNEL_IR2);
 //Mission thread: gets reference to IR sensor
 ThMission thMission("Mission", &irSensor1, &irSensor2, &irMotor);
 
-ThCamera thCamera;
+//ThCamera thCamera;
 
 ThTelecommand::ThTelecommand(const char* name) {
 	cmd = value = 0;
@@ -149,7 +149,7 @@ void delayx(int x)
 
 void ThTelecommand::run()
 {
-	//I2C_1.init();
+	I2C_1.init();
 
 #ifdef PROTOCOL_BINARY
 		run_binary();
@@ -281,7 +281,7 @@ void ThTelecommand::exectue() {
 
 	case (PICT):
 		//PRINTF("TC: TODO picture mode");
-                thCamera.captureAndSend();
+         //       thCamera.captureAndSend();
 		break;
 
 	case (PONT):
@@ -293,7 +293,7 @@ void ThTelecommand::exectue() {
 		break;
 
 	case (MISSION):
-		thMission.toggleMission();
+		//thMission.toggleMission();
 		break;
 
 	case (IRSM):
