@@ -83,16 +83,17 @@ int32_t PiController::pid(float setpoint, float actual) {
 	} else if (error < -180) {
 		error += 360;
 	}
+//
+//	//In case error is too small then stop integration
+//	if (ABS(error) > epsilonI)
+//		integral = integral + error * dt;
 
-	//In case error is too small then stop integration
-	if (ABS(error) > epsilonI)
-		integral = integral + error * dt;
-
+	integral = integral + error * dt;
 
 
 //	//In case error is too small then stop derivative
 //	if (ABS(error) > epsilonD)
-		derivative = (error - preError) / dt;
+	derivative = (error - preError) / dt;
 
 
 	preError = error;

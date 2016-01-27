@@ -294,7 +294,7 @@ void ThImuRead::run() {
 			}
 
 			// input value is just the gyro dz value!
-			duty = controller.pi(setPoint, imu.gyr.dx);
+			duty = controller.pid(setPoint, ahrs.yFus);
 
 			// Enables/disables motor controller
 			if (motorCtrl) {
