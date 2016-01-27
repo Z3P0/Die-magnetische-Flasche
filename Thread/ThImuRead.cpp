@@ -81,7 +81,7 @@ void ThImuRead::run() {
 	imu.accSetDefaultValues();
 
 	// Sensors
-	//Light ls;
+	Light ls;
 	float lightVal;
 
 	// ADC
@@ -211,8 +211,8 @@ void ThImuRead::run() {
 
 				// Read Light sensor
 				if (lightPrint) {
-					//ls.read();
-					//sprintf(printOutput, "light ch1%d ch1%d\r\n", ls.ch0, ls.ch1);
+					ls.read();
+					sprintf(printOutput, "light ch1%d ch1%d\r\n", ls.ch0, ls.ch1);
 					PRINTF(printOutput);
 				}
 

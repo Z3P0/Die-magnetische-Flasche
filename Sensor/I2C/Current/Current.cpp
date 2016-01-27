@@ -60,6 +60,14 @@ int8_t Current::read() {
 	return 0;
 }
 
+float Current::getCurrent(){
+	return raw_current;
+}
+
+float Current::getVoltage(){
+	return raw_bus_v;
+}
+
 // values [0] power; values [1] current
 void Current::getPowerCurrent(float *values) {
 	if (read() == -1)
@@ -70,6 +78,5 @@ void Current::getPowerCurrent(float *values) {
 
 	// Current = shuntVoltage * calibrationRegister / 4096;
 	values[1] = (raw_shunt_v * RAW_CAL_REGISTER) / 4096.0;
-
 }
 

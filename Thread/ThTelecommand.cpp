@@ -19,10 +19,21 @@ I * ThTelecommand.cpp
 #include <stdio.h>
 #include "../Sensor/OV7670/camera.h"
 #include "../Define/Define.h"
+#include "../Sensor/Filter/AHRS.h"
+
+// Ahead and reference system
+AHRS ahrs(0.01);
+
+// Solar panel object for voltage and current
+SolarPannel solarPannel(&ADC_1, ADC_CHANNEL_SOL_A, ADC_CHANNEL_SOL_V);
+
+// Light sensor
+Light lightSensor;
 
 // Threads objects
-ThTelemetry tm("Telemetry");
+ThTelemetry tm("Telemetry", &ahrs, &solarPannel, &lightSensor);
 ThTelecommand tc("Telecommand");
+
 /* Definition of the H-bridges*/
 Hbridge thKnife(1000, 1000, &HBRIDGE_A, &HBRIDGE_A_INA, &HBRIDGE_A_INB);
 Hbridge flWheel(1000, 1000, &HBRIDGE_B, &HBRIDGE_B_INA, &HBRIDGE_B_INB);

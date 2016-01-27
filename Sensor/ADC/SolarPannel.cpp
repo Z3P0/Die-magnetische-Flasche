@@ -42,7 +42,8 @@ float SolarPannel::getVoltage() {
 
 float SolarPannel::getCurrent() {
 
-	float cur = (float)read(&chVoltage) * CUR_CAL;
+	//TODO check that!
+	float cur = (float)read(&chCurrent) * CUR_CAL;
 
 	return (getVoltage() /R1 + cur * curVal + cur/R5);
 }
