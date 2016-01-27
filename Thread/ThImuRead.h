@@ -89,7 +89,8 @@ private:
 	bool currePrint;
 	bool solarPrint;
 	bool irPrint;
-	bool motorPrint;
+	bool motorPrintPos;
+	bool motorPrintVel;
 
 	// Flags for calibration
 	bool magCalFlag;

@@ -128,7 +128,7 @@ private:
 
 	/* Magnetometer Accelerometer - LSM303DLH*/
 	const uint8_t outAllAxisLSM303[1] = { LSM303DLH_OUT_ALL };
-	//const uint8_t magWriteLSM303 = LSM303DHL_WRITE;
+	//const	 uint8_t magWriteLSM303 = LSM303DHL_WRITE;
 	const uint8_t magAdressLSM303 = LSM303_ADDRESS;
 	const uint8_t crAReg[2] = { CRA_REG_M_ADDRESS,CRA_REG_M_VALUE};
 	const uint8_t crBReg[2] = { CRB_REG_M_ADDRESS,CRB_REG_M_VALUE};

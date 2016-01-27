@@ -11,9 +11,8 @@ PiController::PiController() {
 	dt = SAMPLING_TIME;     	// Sampling time of the control function
 	//PI set values
 
-//	kp_pi = KP_PI;
-//	ki_pi = KI_PI;
-//	kd_pi = KD_PI;
+	kp_pi = KP_PI;
+	ki_pi = KI_PI;
 
 	//PID set values
 	kp_pid = KP_PID;
@@ -39,7 +38,7 @@ PiController::~PiController() {
 // the satellite it outputs the duty cycle to be applied to the PWM
 // @parameters setpoint =desired speed
 // @parameters actual= speed from Gyroscope
-unsigned int PiController::pi(float setpoint, float actual) {
+int32_t PiController::pi(float setpoint, float actual) {
 
 	//Calculate PID
 	error = setpoint - actual;
@@ -48,24 +47,19 @@ unsigned int PiController::pi(float setpoint, float actual) {
 	if (ABS(error) > epsilonI)
 		integral = integral + error * dt;
 
-	//derivative= (error - pre_error)/dt;
-	//output= Kp*error + Ki*integral + Kd*derivative;
-	output = kp_pi * error + ki_pi * integral;
+	// Derivative= (error - pre_error)/dt;
+	// output= Kp*error + Ki*integral + Kd*derivative;
+	output = -(kp_pi * error + ki_pi * integral);
 
-	//Scale PID output for PWM  (it has to be a value between 0-8v)
-	//output= (output*Vmax)/(226000*setpoint);
-
-	//from angular velocity to voltage   v=w*0.01175
-	output = ABS(output * 0.01175);
 
 	//Saturation filter
 	if (output > V_MAX)
 		output = V_MAX;
-	else if (output < MIN)
-		output = MIN;
+	else if (output < V_MIN)
+		output = V_MIN;
 
-	//duty cycle
-	return ((output / V_MAX) * PWM_RES);
+	// Duty cycle
+	return (output * factor);
 }
 
 // This function implements the PI control required to control the velocity of

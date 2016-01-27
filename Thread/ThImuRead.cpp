@@ -38,7 +38,8 @@ ThImuRead::ThImuRead(const char* name, Hbridge *flWheel) {
 	currePrint = false;
 	solarPrint = false;
 	irPrint = false;
-	motorPrint = true;
+	motorPrintPos = false;
+	motorPrintVel = true,
 
 	flag = false;
 	changeAlphaFlag = false;
@@ -170,12 +171,12 @@ void ThImuRead::run() {
 
 		if (kiFlag) {
 			controller.setIntegral((value / 1000.00));
-			PRINTF("Controller new ki value %f \r\n", controller.ki_pid);
+			PRINTF("Controller new ki value %f \r\n", controller.ki_pi);
 		}
 
 		if (kpFlag) {
 			controller.setProportional((value / 1000.00));
-			PRINTF("Controller new kp value %f \r\n", controller.kp_pid);
+			PRINTF("Controller new kp value %f \r\n", controller.kp_pi);
 		}
 
 		if (setPointFlag) {
@@ -254,12 +255,11 @@ void ThImuRead::run() {
 				}
 
 				// Print current sensor
-				if(currePrint){
+				if (currePrint) {
 					bat.read();
 					//sprintf(printOutput, "Current ", bat.Current())
 
 				}
-
 
 				// Print solar pannel data
 				if (solarPrint) {
@@ -279,11 +279,11 @@ void ThImuRead::run() {
 					PRINTF(printOutput);
 				}
 
-				if (motorPrint) {
-					PRINTF("----------------------------\r\n\n\n");
+				if (motorPrintPos) {
+					PRINTF("----------POSITION---------------\r\n\n\n");
 					PRINTF("Duty %d set %.1f acu %.1f \r\n", duty, setPoint, ahrs.yFus);
-					PRINTF("p: %.7f i:%.7f d%.7f \r\n", controller.kp_pid, controller.ki_pid, controller.kd_pid );
-					PRINTF("p: %.1f i:%.1f d%.1f \r\n", (controller.error * controller.kd_pid), (controller.integral * controller.ki_pid ),(controller.derivative * controller.kd_pid));
+					PRINTF("p: %.7f i:%.7f d%.7f \r\n", controller.kp_pid, controller.ki_pid, controller.kd_pid);
+					PRINTF("p: %.1f i:%.1f d%.1f \r\n", (controller.error * controller.kd_pid), (controller.integral * controller.ki_pid), (controller.derivative * controller.kd_pid));
 
 					if (motorCtrl) {
 						PRINTF("---->ON!\r\n");
@@ -291,10 +291,26 @@ void ThImuRead::run() {
 						PRINTF("OFF<-----\r\n");
 					}
 				}
+				if (motorPrintVel) {
+					PRINTF("----------VELOCITY---------------\r\n\n\n");
+					PRINTF("Duty %d set %.1f acual %.1f \r\n", duty, setPoint, imu.gyr.dz);
+					PRINTF("p: %.7f i:%.7f\r\n", controller.kp_pi, controller.ki_pi);
+					PRINTF("p: %.1f i:%.1f\r\n", (controller.error * controller.kp_pi), (controller.integral * controller.ki_pi));
+
+					if (motorCtrl) {
+						PRINTF("---->ON!\r\n");
+					} else {
+						PRINTF("OFF<-----\r\n");
+					}
+				}
+
 			}
 
 			// input value is just the gyro dz value!
-			duty = controller.pid(setPoint, ahrs.yFus);
+			//duty = controller.pid(setPoint, ahrs.yFus);
+
+			// input value is just the gyro dz value!
+			duty = controller.pi(setPoint, imu.gyr.dz);
 
 			// Enables/disables motor controller
 			if (motorCtrl) {

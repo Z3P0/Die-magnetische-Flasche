@@ -12,9 +12,8 @@
 #include "../Extern/Extern.h"
 
 //// Controller values for PI
-//#define KP_PI 		0.026 		// Proportional gain
-//#define KI_PI 		0.0004		// Integral gain
-//#define KD_PI 		0.1182		// Derivative gain
+#define KP_PI 		0.1		// Proportional gain
+#define KI_PI 		0.018		// Integral gain
 
 // Controller values for PID
 #define KP_PID 		0.1			// Proportional gain  0.08
@@ -24,7 +23,7 @@
 #define PWM_RES		1000     	// PWM resolution
 #define V_MAX 		5      	 	// [Volts] V max output of PWM
 #define V_MIN		-5			// [Volts] V max output of PWM
-#define MIN 		0      	 	// [Volts] V max output of PWM
+
 #define V_MAX_HBrdg	9     		// [Volts] V max that should be applied to the H-bridge.
 #define EPSILON_I	0.3
 
@@ -43,7 +42,7 @@ public:
 	 * 2) actual = speed from gyroscope
 	 * The unit of setpoint, actual and EPSILON1 has to be the same [rad/s] or [deg/s] or [RPM].
 	 */
-	unsigned int pi(float setpoint, float actual);
+	int32_t pi(float setpoint, float actual);
 	int32_t pid(float setpoint, float actual);
 	/* Sets the proportional part of the controller*/
 	void setProportional(float kp) {
@@ -65,12 +64,11 @@ public:
 		this->epsilonI = epsilon;
 	}
 
-	// PI
+	// PI - Velocity control
 	float kp_pi;
 	float ki_pi;
-	float kd_pi;
 
-	//PID
+	//PID - Position control
 	float kp_pid;
 	float ki_pid;
 	float kd_pid;
