@@ -15,8 +15,8 @@ SolarPannel::SolarPannel(HAL_ADC * adc, ADC_CHANNEL chVoltage, ADC_CHANNEL chCur
 	this->chCurrent = chCurrent;
 	sensor = adc;
 
-	volVal = R1 * (R1 + R2);
-	curVal = (R1 + R2) / R1;
+	volVal = (R1 + R2)/ R1;
+	curVal = (R4 + R5) / (R5 * R3);
 }
 
 void SolarPannel::init() {
@@ -44,7 +44,7 @@ float SolarPannel::getCurrent() {
 
 	float cur = (float)read(&chVoltage) * CUR_CAL;
 
-	return (((float)read(&chVoltage)* VOL_CAL) /R1 + cur * curVal + cur/R5);
+	return (getVoltage() /R1 + cur * curVal + cur/R5);
 }
 
 float SolarPannel::getPower(){

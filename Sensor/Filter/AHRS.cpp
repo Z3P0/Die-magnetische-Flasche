@@ -57,6 +57,9 @@ void AHRS::filterUpdate2(IMU_Acc* acc, IMU_Gyro* gyr, IMU_Mag* mag) {
 	pFus = (0.3 * acc->p + 0.7 * gyr->p);
 	yFus = (0.9 * gyr->y + 0.1 * mY);
 
+
+	//int n = ((int)yFus % 360);
+
 	if(yFus < 0)
 		yFus += 360;
 	else if(yFus > 360)

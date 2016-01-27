@@ -33,10 +33,11 @@ ThImuRead::ThImuRead(const char* name, Hbridge *flWheel) {
 	magPrint = false;
 
 	// This is the normal stuff
-	filPrint = true;
+	filPrint = false;
 	lightPrint = false;
 	solarPrint = false;
 	irPrint = false;
+	motorPrint = true;
 
 	flag = false;
 	changeAlphaFlag = false;
@@ -126,8 +127,7 @@ void ThImuRead::run() {
 			// Read and print out values for the soft iron calibration
 			int cnt = 0;
 			PRINTF("Magnetometer calibration starts in 5 seconds.....reset the commuication\r\n");
-			suspendCallerUntil(NOW()+5*SECONDS);
-
+			suspendCallerUntil(NOW()+7*SECONDS);
 
 			while (cnt < SAMPLES_SOFTCAL) {
 				cnt++;
@@ -135,7 +135,7 @@ void ThImuRead::run() {
 
 				sprintf(printOutput, "%d,%d,%d\r", imu.mag.xRAW, imu.mag.yRAW, imu.mag.zRAW);
 				PRINTF(printOutput);
-				suspendCallerUntil(NOW()+15*MILLISECONDS);
+				suspendCallerUntil(NOW()+25*MILLISECONDS);
 			}
 
 			// Suspend the print so that the user can store the values;
@@ -163,17 +163,17 @@ void ThImuRead::run() {
 
 		if (kdFlag) {
 			controller.setDerivative((value / 1000.00));
-			PRINTF("Controller new kd value %f \r\n", controller.ki_pi);
+			PRINTF("Controller new kd value %f \r\n", controller.ki_pid);
 		}
 
 		if (kiFlag) {
 			controller.setIntegral((value / 1000.00));
-			PRINTF("Controller new ki value %f \r\n", controller.ki_pi);
+			PRINTF("Controller new ki value %f \r\n", controller.ki_pid);
 		}
 
 		if (kpFlag) {
 			controller.setProportional((value / 1000.00));
-			PRINTF("Controller new kp value %f \r\n", controller.kp_pi);
+			PRINTF("Controller new kp value %f \r\n", controller.kp_pid);
 		}
 
 		if (setPointFlag) {
@@ -268,10 +268,22 @@ void ThImuRead::run() {
 					sprintf(printOutput, "IR2 %f\r\n", ir2.read());
 					PRINTF(printOutput);
 				}
+
+				if (motorPrint) {
+					PRINTF("Duty %d setpoint%.1f acutal %.1f \r\n", duty, setPoint, ahrs.yFus);
+					PRINTF("p: %.7f i:%.7f d%.7f \r\n", controller.kp_pid, controller.ki_pid, controller.kd_pid );
+					PRINTF("e: %.1f i:%.1f d%.1f \r\n", controller.error, controller.integral ,controller.derivative );
+
+					if (motorCtrl) {
+						PRINTF("MOTOR CONTROL IS ON!\r\n");
+					} else {
+						PRINTF("MOTOR CONTROL IS OFF!\r\n");
+					}
+				}
 			}
 
 			// input value is just the gyro dz value!
-			//duty = controller.pi(setPoint, imu.gyr.dz);
+			duty = controller.pid(setPoint, ahrs.yFus);
 
 			// Enables/disables motor controller
 			if (motorCtrl) {

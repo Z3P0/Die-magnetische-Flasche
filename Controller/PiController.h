@@ -17,14 +17,14 @@
 #define KD_PI 		0.1182		// Derivative gain
 
 // Controller values for PID
-#define KP_PID 		0.02675 	// Proportional gain
-#define KI_PID 		1.000443	// Integral gain
-#define KD_PID 		0.11827		// Derivative gain
+#define KP_PID 		0.002675 	// Proportional gain
+#define KI_PID 		0.0000443	// Integral gain
+#define KD_PID 		0.011827	// Derivative gain
 
 
 
 #define PWM_RES		1000     	// PWM resolution
-#define V_MAX 		7      	 	// [Volts] V max output of PWM
+#define V_MAX 		6      	 	// [Volts] V max output of PWM
 #define MIN 		0      	 	// [Volts] V max output of PWM
 #define V_MAX_HBrdg	9     		// [Volts] V max that should be applied to the H-bridge.
 #define EPSILON 	0.5    		// [Degree] Steady state error margin

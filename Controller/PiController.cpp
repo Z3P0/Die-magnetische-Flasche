@@ -10,6 +10,7 @@
 PiController::PiController() {
 	dt = SAMPLING_TIME;     	// Sampling time of the control function
 	//PI set values
+
 	kp_pi = KP_PI;
 	ki_pi = KI_PI;
 	kd_pi = KD_PI;
@@ -72,6 +73,11 @@ unsigned int PiController::pi(float setpoint, float actual) {
 // @parameters actual= speed from Gyroscope
 int32_t PiController::pid(float setpoint, float actual) {
 
+//	if(actual > 360)
+//		actual -= 360;
+//	else if(actual < -360)
+//		actual += 360;
+
 	//Calculate PID
 	error = setpoint - actual;
 
@@ -83,8 +89,9 @@ int32_t PiController::pid(float setpoint, float actual) {
 
 	preError = error;
 
+	//Change all ki values to pid
 	output = kp_pid * error + ki_pid * integral + kd_pid * derivative;
-
+	//output = kp_pid * error + ki_pid * integral;
 
 	// From angular velocity to voltage
 	// output = ABS(output);
@@ -96,5 +103,5 @@ int32_t PiController::pid(float setpoint, float actual) {
 		output = -V_MAX;
 
 	// Duty cycle
-	return (output *factor);
+	return (-1*output *factor);
 }
