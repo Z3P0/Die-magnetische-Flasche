@@ -22,12 +22,12 @@
 #define SAMPLING_TIME		0.015
 #define i2c_1_speed			100000
 
-//#define PROTOCOL_BINARY
+#define PROTOCOL_BINARY
 
 /*Camera */
 //#define CAM_DEBUG
 #define WIDTH 100
-#define HEIGHT 180
+#define HEIGHT 140
 #define IMAGESIZE (WIDTH*HEIGHT*2) //multiply by 2 because we use YUV
 #define YUV422
 #define CAMADR 0x21

@@ -11,7 +11,7 @@
 #include "../../Define/Define.h"
 #include "../../Extern/Extern.h"
 
-#define MAXSAMPLES  4
+#define MAXSAMPLES 15
 
 class IR {
 public:

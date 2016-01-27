@@ -34,10 +34,10 @@ ThSolar thSolar("Solar", &thKnife);
 ThImuRead imuRead("IMURead", &flWheel);
 
 //IR sensor: gets reference to ADC
-//IR irSensor(&ADC_1);
+IR irSensor(&ADC_1, ADC_CHANNEL_IR1);
 //Mission thread: gets reference to IR sensor
-//ThMission thMission("Mission", &irSensor, &irMotor);
-//ThCamera thCamera;
+ThMission thMission("Mission", &irSensor, &irMotor);
+
 
 ThTelecommand::ThTelecommand(const char* name) {
 	cmd = value = 0;
@@ -136,7 +136,7 @@ void delayx(int x)
 
 void ThTelecommand::run()
 {
-	I2C_1.init();
+	//I2C_1.init();
 
 #ifdef PROTOCOL_BINARY
 		run_binary();
@@ -268,7 +268,7 @@ void ThTelecommand::exectue() {
 
 	case (PICT):
 		//PRINTF("TC: TODO picture mode");
-        // thCamera.captureAndSend();
+                thCamera.captureAndSend();
 		break;
 
 	case (PONT):
@@ -280,7 +280,7 @@ void ThTelecommand::exectue() {
 		break;
 
 	case (MISSION):
-//		thMission.toggleMission();
+		thMission.toggleMission();
 		break;
 
 	case (IRSM):

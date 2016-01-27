@@ -9,6 +9,11 @@
 #include "../Sensor/OV7670/camera.h"
 #include "../TCTM/SerializationUtil.h"
 
+namespace RODOS {
+extern HAL_UART uart_stdout;
+}
+
+
 Camera cam;
 ThCamera::ThCamera() {
 	// TODO Auto-generated constructor stub
@@ -30,29 +35,35 @@ void ThCamera::run()
 		cam.takePicture();
 
 #ifdef PROTOCOL_BINARY
+
+
+		char buff[8];
+
+		//Header for image packet
+		buff[0] = 0xAA;
+		buff[1] = 0xAA;
+		buff[2] = 0xAA;
+		buff[3] = 0x02;
+
+
+		SerializationUtil::WriteInt((int16_t)HEIGHT,buff,4);
+		SerializationUtil::WriteInt((int16_t)WIDTH,buff,6);
+
 		//Lock bluetooth
 		BT_Semaphore.enter();
 
-		//Header for Image packet
-		PRINTF("%c%c%c%c", 0xAA, 0xAA, 0xAA, 0x02);
-		char len[2];
-
-		//Height of image
-		SerializationUtil::WriteInt((int16_t)HEIGHT,len,0);
-		PRINTF("%c%c", len[0], len[1]);
-
-		//Width of image
-		SerializationUtil::WriteInt((int16_t)WIDTH,len,0);
-		PRINTF("%c%c", len[0], len[1]);
+		uart_stdout.write(buff, 8);
 #else
 	PRINTF("I");
 #endif
-		//Sending image
-		for(int j=0; j<HEIGHT*2;j++){
-			for(int i=0; i<WIDTH; i++)
-				PRINTF("%c",DCMI_Buffer[i+j*WIDTH]);
-			suspendCallerUntil(NOW()+5*MILLISECONDS);
-		}
+		writeToBT((char *)DCMI_Buffer, IMAGESIZE);
+
+//		int bytesSent = 0;
+//		while(bytesSent<IMAGESIZE)
+//		{
+//			bytesSent += uart_stdout.write((char *)(DCMI_Buffer + bytesSent), IMAGESIZE - bytesSent);
+//			while(!uart_stdout.isWriteFinished());
+//		}
 
 		//Release bluetooth
 		BT_Semaphore.leave();

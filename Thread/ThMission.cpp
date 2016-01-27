@@ -6,10 +6,8 @@
  */
 
 #include "ThMission.h"
-#include "../Sensor/Camera/Camera.h"
 #include "../TCTM/SerializationUtil.h"
 
-//Camera cam;
 ThMission::ThMission(const char* name, IR* ir, Hbridge* irmtr) {
 	irSensor = ir;
 	missionMode = false;
@@ -28,7 +26,6 @@ void ThMission::run(){
 	while(1)
 	{
 		suspendCallerUntil();
-		//cam.init();
 		int64_t mission_start = NOW();
 		if(sensorOnTop)
 			irMotor->moveDown();
@@ -45,34 +42,37 @@ void ThMission::run(){
 				h = 1000 - h;
 			float ir = irSensor->read();
 #ifdef PROTOCOL_BINARY
-			//Lock bluetooth
-			BT_Semaphore.enter();
+			char buff[16];
 
-			//Mission packet header
-			PRINTF("%c%c%c%c",0xAA,0xAA,0xAA,0x03);
-			//int32_t x = *(int32_t*)(&h);
-			char buff[2];
+			//Mission packet Header
+			buff[0] = 0xAA;
+			buff[1] = 0xAA;
+			buff[2] = 0xAA;
+			buff[3] = 0x03;
 
 			//Timestamp for height
-			SerializationUtil::WriteInt((int16_t)h,buff,0);
-			PRINTF(buff);
+			SerializationUtil::WriteInt((int16_t)h,buff,4);
 
 			//roll
-			SerializationUtil::WriteInt((int16_t)h,buff,0);
-			PRINTF(buff);
+			SerializationUtil::WriteInt((int16_t)10,buff,6);
 
 			//pitch
-			SerializationUtil::WriteInt((int16_t)h,buff,0);
-			PRINTF(buff);
+			SerializationUtil::WriteInt((int16_t)h,buff,8);
 
 			//yaw
-			SerializationUtil::WriteInt((int16_t)h,buff,0);
-			PRINTF(buff);
+			SerializationUtil::WriteInt((int16_t)h,buff,10);
 
-			//IR
-			SerializationUtil::WriteInt((int16_t)ir,buff,0);
-			PRINTF(buff);
+			ir = h / 100;
+			//IR-1 value
+			SerializationUtil::WriteInt((int16_t)ir,buff,12);
 
+			//IR-2 value
+			SerializationUtil::WriteInt((int16_t)ir,buff,14);
+
+
+			//Lock bluetooth
+			BT_Semaphore.enter();
+			writeToBT(buff, 16);
 			//Unlock bluetooth
 			BT_Semaphore.leave();
 #else

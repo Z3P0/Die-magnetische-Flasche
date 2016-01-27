@@ -69,7 +69,7 @@ ThImuRead::~ThImuRead() {
 
 void ThImuRead::init() {
 	// Initialize of the I2C one speed just once here!
-	I2C_1.init(400000);
+	//I2C_1.init(100000);
 	// Configure ADCs just here
 	ADC_1.config(ADC_PARAMETER_RESOLUTION, 12);
 	ADC_2.config(ADC_PARAMETER_RESOLUTION, 12);
@@ -81,7 +81,7 @@ void ThImuRead::run() {
 	imu.accSetDefaultValues();
 
 	// Sensors
-	Light ls;
+	//Light ls;
 	float lightVal;
 
 	// ADC
@@ -211,8 +211,8 @@ void ThImuRead::run() {
 
 				// Read Light sensor
 				if (lightPrint) {
-					ls.read();
-					sprintf(printOutput, "light ch1%d ch1%d\r\n", ls.ch0, ls.ch1);
+					//ls.read();
+					//sprintf(printOutput, "light ch1%d ch1%d\r\n", ls.ch0, ls.ch1);
 					PRINTF(printOutput);
 				}
 

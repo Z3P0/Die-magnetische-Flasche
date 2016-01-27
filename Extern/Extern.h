@@ -11,7 +11,8 @@
 #include "../Define/Define.h"
 
 /* Communication UART*/
-extern HAL_UART bluetooth_uart;
+//extern HAL_UART bluetooth_uart;
+
 
 /* Blue LED - the last that is not effected by the H-bridge*/
 extern HAL_GPIO BlueLED;
@@ -47,5 +48,7 @@ extern HAL_I2C I2C_1;
 extern uint8_t DCMI_Buffer[HEIGHT*WIDTH * 2];
 
 extern Semaphore BT_Semaphore;
+
+void writeToBT(const char *buf, int size);
 
 #endif /* EXTERN_H_ */

@@ -46,3 +46,19 @@ uint8_t DCMI_Buffer[HEIGHT*WIDTH * 2];
 
 /*Semaphore for Bluetooth communication with ground station*/
 Semaphore BT_Semaphore;
+
+
+void writeToBT(const char *buf, int size) {
+	int sentBytes = 0;
+	int retVal;
+	while (sentBytes < size) {
+		retVal = uart_stdout.write(&buf[sentBytes], size - sentBytes);
+		uart_stdout.suspendUntilWriteFinished();
+		if (retVal < 0) {
+			PRINTF("UART sent error\n");
+		} else {
+			sentBytes += retVal;
+		}
+	}
+}
+

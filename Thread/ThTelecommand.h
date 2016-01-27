@@ -11,9 +11,6 @@
 #include "../Actuators/Hbridge.h"
 #include "../TCTM/Telecommand.h"
 
-namespace RODOS {
-extern HAL_UART uart_stdout;
-}
 
 Telecommand telecmds[] = {
 		// Controller

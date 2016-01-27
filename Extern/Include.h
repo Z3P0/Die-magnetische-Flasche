@@ -15,4 +15,8 @@
 #include "math.h"
 
 #include "../Define/Define.h"
+
+namespace RODOS {
+extern HAL_UART uart_stdout;
+}
 #endif /* INCLUDE_H_ */
