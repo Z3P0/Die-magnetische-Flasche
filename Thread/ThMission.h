@@ -13,7 +13,7 @@
 
 class ThMission: public Thread{
 public:
-	ThMission(const char* name, IR* irSensor, Hbridge* irMotor);
+	ThMission(const char* name, IR* irSensor1, IR* irSensor2, Hbridge* irMotor);
 	virtual ~ThMission();
 	void init();
 	void run();
@@ -21,7 +21,8 @@ public:
 
 private:
 	bool missionMode;
-	IR* irSensor;
+	IR* irSensor1;
+	IR* irSensor2;
 	Hbridge* irMotor;
 };
 

@@ -34,10 +34,12 @@ ThSolar thSolar("Solar", &thKnife);
 ThImuRead imuRead("IMURead", &flWheel);
 
 //IR sensor: gets reference to ADC
-IR irSensor(&ADC_1, ADC_CHANNEL_IR1);
+IR irSensor1(&ADC_1, ADC_CHANNEL_IR1);
+IR irSensor2(&ADC_1, ADC_CHANNEL_IR2);
 //Mission thread: gets reference to IR sensor
-ThMission thMission("Mission", &irSensor, &irMotor);
+ThMission thMission("Mission", &irSensor1, &irSensor2, &irMotor);
 
+ThCamera thCamera;
 
 ThTelecommand::ThTelecommand(const char* name) {
 	cmd = value = 0;

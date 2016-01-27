@@ -83,7 +83,6 @@ void ThTelemetry:: run(){
 
 		BT_Semaphore.enter();
 		writeToBT(buff, 22);
-//		uart_stdout.write(buff, 22);
 		while(!uart_stdout.isWriteFinished());
 		BT_Semaphore.leave();
 #else

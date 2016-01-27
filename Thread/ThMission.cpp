@@ -8,8 +8,9 @@
 #include "ThMission.h"
 #include "../TCTM/SerializationUtil.h"
 
-ThMission::ThMission(const char* name, IR* ir, Hbridge* irmtr) {
-	irSensor = ir;
+ThMission::ThMission(const char* name, IR* ir1, IR* ir2, Hbridge* irmtr) {
+	irSensor1 = ir1;
+	irSensor2 = ir2;
 	missionMode = false;
 	irMotor = irmtr;
 }
@@ -22,7 +23,8 @@ void ThMission::init(){
 }
 void ThMission::run(){
 	static bool sensorOnTop = false;
-	irSensor->init();
+	irSensor1->init();
+	irSensor2->init();
 	while(1)
 	{
 		suspendCallerUntil();
@@ -36,11 +38,11 @@ void ThMission::run(){
 		while(true)
 		{
 
-
 			float h = (NOW() - mission_start) / (MILLISECONDS * 60);
 			if(sensorOnTop)
 				h = 1000 - h;
-			float ir = irSensor->read();
+			float ir1 = irSensor1->read();
+			float ir2 = irSensor2->read();
 #ifdef PROTOCOL_BINARY
 			char buff[16];
 
@@ -62,12 +64,12 @@ void ThMission::run(){
 			//yaw
 			SerializationUtil::WriteInt((int16_t)h,buff,10);
 
-			ir = h / 100;
+			//ir1 = h / 100;
 			//IR-1 value
-			SerializationUtil::WriteInt((int16_t)ir,buff,12);
+			SerializationUtil::WriteInt((int16_t)ir1,buff,12);
 
 			//IR-2 value
-			SerializationUtil::WriteInt((int16_t)ir,buff,14);
+			SerializationUtil::WriteInt((int16_t)ir2,buff,14);
 
 
 			//Lock bluetooth
