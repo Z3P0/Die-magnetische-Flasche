@@ -47,23 +47,22 @@ void AHRS::filterUpdate2(IMU_Acc* acc, IMU_Gyro* gyr, IMU_Mag* mag) {
 	mY = atan2(myH, mxH) * RAD_TO_DEG;
 
 	//This is for a smooth 360 to 0 and vice versa transition
-	if((gyr->y - mY) > 90)
+	if ((gyr->y - mY) > 90)
 		mY += 180;
-	else if((mY - gyr->y) > 90)
+	else if ((mY - gyr->y) > 90)
 		mY -= 180;
 
 	// Fusion for roll and pitch are degree values
 	rFus = (0.3 * acc->r + 0.7 * gyr->r);
 	pFus = (0.3 * acc->p + 0.7 * gyr->p);
-	yFus = (0.9 * gyr->y + 0.1 * mY);
+	yFus = (0.85 * gyr->y + 0.15 * mY);
 
+	yFus = ABS(yFus);
+	int n = (int) (yFus / 360);
 
-	//int n = ((int)yFus % 360);
+	if (yFus > 360)
+		yFus -= n * 360;
 
-	if(yFus < 0)
-		yFus += 360;
-	else if(yFus > 360)
-		yFus -= 360;
 }
 
 void AHRS::setAlpha(float alpha) {

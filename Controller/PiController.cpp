@@ -11,16 +11,17 @@ PiController::PiController() {
 	dt = SAMPLING_TIME;     	// Sampling time of the control function
 	//PI set values
 
-	kp_pi = KP_PI;
-	ki_pi = KI_PI;
-	kd_pi = KD_PI;
+//	kp_pi = KP_PI;
+//	ki_pi = KI_PI;
+//	kd_pi = KD_PI;
 
 	//PID set values
 	kp_pid = KP_PID;
 	ki_pid = KI_PID;
 	kd_pid = KD_PID;
 
-	epsilon = EPSILON;
+	epsilon1 = EPSILON1;
+	epsilon2 = EPSILON2;
 	factor = (PWM_RES / V_MAX_HBrdg);     // PWM Resolution /V_MAX
 	output = 0;
 
@@ -44,7 +45,7 @@ unsigned int PiController::pi(float setpoint, float actual) {
 	error = setpoint - actual;
 
 	//In case error is too small then stop integration
-	if (ABS(error) > epsilon)
+	if (ABS(error) > epsilon1)
 		integral = integral + error * dt;
 
 	//derivative= (error - pre_error)/dt;
@@ -73,35 +74,33 @@ unsigned int PiController::pi(float setpoint, float actual) {
 // @parameters actual= speed from Gyroscope
 int32_t PiController::pid(float setpoint, float actual) {
 
-//	if(actual > 360)
-//		actual -= 360;
-//	else if(actual < -360)
-//		actual += 360;
-
 	//Calculate PID
 	error = setpoint - actual;
-
-	// In case error is too small then stop integration
-	if (ABS(error) > epsilon)
-		integral = integral + error * dt;
-
+	if (error > 0) {
+		// In case error is too small then stop integration
+		if (ABS(error) > epsilon1)
+			integral = integral + error * dt;
+	} else {
+		if (ABS(error) > epsilon2)
+			integral = integral + error * dt;
+	}
 	derivative = (error - preError) / dt;
 
 	preError = error;
 
-	//Change all ki values to pid
+//Change all ki values to pid
 	output = kp_pid * error + ki_pid * integral + kd_pid * derivative;
-	//output = kp_pid * error + ki_pid * integral;
+//output = kp_pid * error + ki_pid * integral;
 
-	// From angular velocity to voltage
-	// output = ABS(output);
+// From angular velocity to voltage
+// output = ABS(output);
 
-	// Saturation filter
+// Saturation filter
 	if (output > V_MAX)
 		output = V_MAX;
-	else if (output < -V_MAX)
-		output = -V_MAX;
+	else if (output < V_MIN)
+		output = V_MIN;
 
-	// Duty cycle
-	return (-1*output *factor);
+// Duty cycle
+	return (output * factor);
 }

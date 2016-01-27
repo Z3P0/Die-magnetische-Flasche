@@ -49,14 +49,13 @@ ThImuRead::ThImuRead(const char* name, Hbridge *flWheel) {
 
 	// Flags for calibration
 	accCalFlag = false;
-	gyrCalFlag = false;
+	gyrCalFlag = true;
 	magCalFlag = false;
 	softIrFlag = false;
 
 	value = 0;				// Default value used for the TC
 
 	send = true;     		// Sending continuously values to the GS
-	gyrCalFlag = false;     // Gyroscope calibration by default enabled
 
 	motorCtrl = false;
 	setPointFlag = false;
@@ -110,7 +109,6 @@ void ThImuRead::run() {
 	unsigned int duty = 0;
 
 	flWheel->init();
-	setPoint = 0;     // Setpoint for the controller
 
 	// Endless loop with calibration selection
 	while (1) {
@@ -158,7 +156,7 @@ void ThImuRead::run() {
 		// Controller setpoint change
 		if (epsilonFlag) {
 			controller.setEpsion((value / 1000.00));
-			PRINTF("Controller new epsilon value %f \r\n", controller.epsilon);
+			PRINTF("Controller new epsilon value %f \r\n", controller.epsilon1);
 		}
 
 		if (kdFlag) {
@@ -203,7 +201,7 @@ void ThImuRead::run() {
 			}
 
 			// Print
-			if ((cnt++ > 15) && (send)) {
+			if ((cnt++ > 16) && (send)) {
 				cnt = 0;
 
 				// Read Light sensor
@@ -270,14 +268,15 @@ void ThImuRead::run() {
 				}
 
 				if (motorPrint) {
-					PRINTF("Duty %d setpoint%.1f acutal %.1f \r\n", duty, setPoint, ahrs.yFus);
+					PRINTF("----------------------------\r\n\n\n");
+					PRINTF("Duty %d set %.1f acu %.1f \r\n", duty, setPoint, ahrs.yFus);
 					PRINTF("p: %.7f i:%.7f d%.7f \r\n", controller.kp_pid, controller.ki_pid, controller.kd_pid );
 					PRINTF("e: %.1f i:%.1f d%.1f \r\n", controller.error, controller.integral ,controller.derivative );
 
 					if (motorCtrl) {
-						PRINTF("MOTOR CONTROL IS ON!\r\n");
+						PRINTF("---->ON!\r\n");
 					} else {
-						PRINTF("MOTOR CONTROL IS OFF!\r\n");
+						PRINTF("OFF<-----\r\n");
 					}
 				}
 			}
