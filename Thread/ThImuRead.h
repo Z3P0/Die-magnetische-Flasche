@@ -76,6 +76,12 @@ public:
 		return (send = !send);
 	}
 
+	//1- velocity 2- position
+	void setControlType(int type)
+	{
+		controlType = type;
+	}
+
 private:
 
 	AHRS *ahrs;
@@ -115,6 +121,7 @@ private:
 
 	int value;
 	float setPoint;
+	int controlType; //1-velocity 2- position
 
 	// Reference to the motor
 	Hbridge *flWheel;

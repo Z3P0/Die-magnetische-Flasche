@@ -17,13 +17,13 @@ AHRS::AHRS(float sampleRate) {
 
 	setAllValuesToZero();
 
-	gx = 0;
-	gy = 0;
-	gz = 0;
+	gdz = 0;
 
 	rFus = 0;
 	pFus = 0;
 	yFus = 0;
+
+
 
 	alpha = 0;
 	pre_yFus = 0;
@@ -67,6 +67,10 @@ void AHRS::filterUpdate2(IMU_Acc* acc, IMU_Gyro* gyr, IMU_Mag* mag) {
 		yFus -= n * 360;
 	else if (yFus < 0)
 		yFus += (n+1) * 360;
+
+	yFinal = yFus;
+	gdz = gyr->dz;
+
 
 }
 

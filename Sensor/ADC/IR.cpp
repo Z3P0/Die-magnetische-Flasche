@@ -20,7 +20,7 @@ IR::IR(HAL_ADC * adc, ADC_CHANNEL cha) {
 IR::~IR() {}
 
 void IR::init() {
-	sensor->config(ADC_PARAMETER_RESOLUTION, 12);
+	//sensor->config(ADC_PARAMETER_RESOLUTION, 12);
 	sensor->init(channel);
 }
 

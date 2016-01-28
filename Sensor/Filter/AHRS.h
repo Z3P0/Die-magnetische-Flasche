@@ -28,14 +28,15 @@ public:
 	float rFus;
 	float pFus;
 	float yFus;
+
+	float yFinal;
+
 	float yFusPre;
 
 	// simple predict variables
 	float pre_yFus;		// predicted value
 
-	float gx;
-	float gy;
-	float gz;
+	float gdz;
 
 	float mY;
 

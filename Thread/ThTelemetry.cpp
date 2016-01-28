@@ -27,13 +27,14 @@ void ThTelemetry::run() {
 
 	// Current
 	//Current batteries(ADDR_BATT);
-	char printftOut[80];
 
-	suspendCallerUntil(NOW() + 8*SECONDS);
 
-	TIME_LOOP(NOW(), MILLISECONDS*1000)
+	suspendCallerUntil(NOW() + 8*SECONDS); //Initialization delay
+
+	TIME_LOOP(NOW(), MILLISECONDS*200)
 	{
 		BlueLED.setPins(~BlueLED.readPins());
+		//continue;
 #ifdef PROTOCOL_BINARY
 
 		char buff[22];
@@ -66,7 +67,7 @@ void ThTelemetry::run() {
 		SerializationUtil::WriteInt((int16_t) (solPan->getVoltage() * 1000), buff, 16);
 
 		// Light sensor value
-		SerializationUtil::WriteInt((int16_t) (lightSensor->getLuxValue() * 1000), buff, 18);
+		SerializationUtil::WriteInt((int16_t) (lightSensor->getLuxValue()), buff, 18);
 
 		//operation mode
 		buff[20] = 0x00;
@@ -74,11 +75,10 @@ void ThTelemetry::run() {
 
 		BT_Semaphore.enter();
 		writeToBT(buff, 22);
-		while (!uart_stdout.isWriteFinished())
-			;
 		BT_Semaphore.leave();
 #else
-
+		continue;
+		char printftOut[80];
 		// Filtered angels Roll, Pitch, Yaw
 		sprintf(printftOut, "r: %.1f deg p: %.1fdeg y: %.1fdeg\r\n", ahrs->rFus, ahrs->pFus ,ahrs->yFus);
 		PRINTF(printftOut);

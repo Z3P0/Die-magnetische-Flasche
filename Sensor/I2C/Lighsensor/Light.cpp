@@ -30,12 +30,20 @@ void Light::init() {
 int16_t Light::read() {
 	uint8_t data[2];
 	if(I2C_1.writeRead(lightAdress, CHANNEL_0_LOW, 1, data, 2) != 2)
+	{
+		I2C_1.reset();
+		I2C_1.init(400000);
 		return -1;
+	}
 
 	ch0 = ((int16_t) ((data[1] << 8) | data[0]));
 
 	if(I2C_1.writeRead(lightAdress, CHANNEL_1_LOW, 1, data, 2) != 2)
+	{
+		I2C_1.reset();
+		I2C_1.init(400000);
 		return -1;
+	}
 
 	ch1 = ((int16_t) ((data[1] << 8) | data[0]));
 
@@ -48,9 +56,17 @@ int16_t Light::read() {
  */
 float Light::getLuxValue() {
 	// Read and check for errors.
+#ifdef PROTOCOL_BINARY
+#else
 	if(read() == -1)
 		PRINTF("Light sensor read error\r\n");
+	//PRINTF("Ch0: %d   Ch1: %d \r\n", ch0, ch1);
+#endif
+	if(read() == -1)
+			PRINTF("Light sensor read error\r\n");
 
+	if(ch0 <= 0 || ch1 <= 0)
+		return 500;
 	float coeff = (ch1/(float)ch0);
 
 	if (coeff <= 0.52){

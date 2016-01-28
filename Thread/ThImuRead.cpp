@@ -60,9 +60,10 @@ ThImuRead::ThImuRead(const char* name, Hbridge *flWheel, AHRS *ahrs) {
 
 	send = true;     		// Sending continuously values to the GS
 
-	motorCtrl = false;
+	motorCtrl = true;
 	setPointFlag = false;
 	setPoint = 0;    	 	// Setpoint for the controller
+	controlType = 0;		//1-velocity 2- position
 }
 
 ThImuRead::~ThImuRead() {
@@ -308,8 +309,15 @@ void ThImuRead::run() {
 			// input value is just the gyro dz value!
 			//duty = controller.pid(setPoint, ahrs.yFus);
 
-			// input value is just the gyro dz value!
-			duty = controller.pi(setPoint, imu.gyr.dz);
+			if(controlType == 1)
+			{
+				// input value is just the gyro dz value!
+				duty = controller.pi(setPoint, imu.gyr.dz);
+			}
+			else if(controlType == 2)
+				duty = controller.pid(setPoint, ahrs->yFus);
+			else
+				duty = 0;
 
 			// Enables/disables motor controller
 			if (motorCtrl) {
@@ -323,6 +331,8 @@ void ThImuRead::run() {
 				break;
 
 			suspendCallerUntil(NOW()+15*MILLISECONDS);
+
+
 		}
 	}
 }

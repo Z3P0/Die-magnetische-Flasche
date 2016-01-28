@@ -39,18 +39,20 @@ Hbridge thKnife(1000, 1000, &HBRIDGE_A, &HBRIDGE_A_INA, &HBRIDGE_A_INB);
 Hbridge flWheel(1000, 1000, &HBRIDGE_B, &HBRIDGE_B_INA, &HBRIDGE_B_INB);
 Hbridge irMotor(1000, 1000, &HBRIDGE_C, &HBRIDGE_C_INA, &HBRIDGE_C_INB);
 
-/* The solar thread gets a reverence to the thermal knife bridge*/
-ThSolar thSolar("Solar", &thKnife);
 /* The IMU thread gets the reference to flywheel*/
 ThImuRead imuRead("IMURead", &flWheel,  &ahrs);
 
-//IR sensor: gets reference to ADC
-IR irSensor1(&ADC_1, ADC_CHANNEL_IR1);
-IR irSensor2(&ADC_1, ADC_CHANNEL_IR2);
-//Mission thread: gets reference to IR sensor
-ThMission thMission("Mission", &irSensor1, &irSensor2, &irMotor);
+/* The solar thread gets a reverence to the thermal knife bridge*/
+ThSolar thSolar("Solar", &thKnife, &imuRead, &ahrs, &lightSensor);
 
-//ThCamera thCamera;
+
+//IR sensor: gets reference to ADC
+IR irSensor1(&ADC_2, ADC_CHANNEL_IR1);
+IR irSensor2(&ADC_2, ADC_CHANNEL_IR2);
+//Mission thread: gets reference to IR sensor
+ThMission thMission("Mission", &irSensor1, &irSensor2, &irMotor, &ahrs, &imuRead);
+
+ThCamera thCamera;
 
 ThTelecommand::ThTelecommand(const char* name) {
 	cmd = value = 0;
@@ -68,6 +70,7 @@ void ThTelecommand::init() {
 //Run function for binary protocol
 void ThTelecommand::run_binary() {
 	char out[6];
+	char headerCh = 0xAA;
 	char tmp;
 	int i = -1;
 	bool nbr = false;
@@ -79,6 +82,16 @@ void ThTelecommand::run_binary() {
 		for (i = 0; i < 6; i++) {
 			uart_stdout.suspendUntilDataReady();
 			out[i] = uart_stdout.getcharNoWait();
+			if(i==2)
+			{
+				//Searching for header
+				if(!(out[0] == headerCh && out[1] ==headerCh && out[2] == headerCh))
+				{
+					out[0]=out[1];
+					out[1]=out[2];
+					i--;
+				}
+			}
 		}
 		cmd = SerializationUtil::ReadInt32(out, 2);
 
@@ -149,7 +162,9 @@ void delayx(int x)
 
 void ThTelecommand::run()
 {
-	I2C_1.init();
+	I2C_1.init(400000);
+	ADC_2.config(ADC_PARAMETER_RESOLUTION, 12);
+	lightSensor.init();
 
 #ifdef PROTOCOL_BINARY
 		run_binary();
@@ -198,6 +213,7 @@ void ThTelecommand::exectue() {
 		imuRead.setValue(value);
 		imuRead.setFlag();
 		imuRead.setSetPointFlag();
+		imuRead.setControlType(1);
 		break;
 
 	case (CTTO):
@@ -271,29 +287,38 @@ void ThTelecommand::exectue() {
 		break;
 
 	case (DEPL):
-		//No need for a extra print command!
 		thSolar.resume();
 		break;
 
 	case (FSUN):
-		PRINTF("TC: FSUN TODO find sun mode");
+		//PRINTF("TC: FSUN TODO find sun mode");
+		thSolar.start();
 		break;
 
 	case (PICT):
-		//PRINTF("TC: TODO picture mode");
-         //       thCamera.captureAndSend();
+		thCamera.captureAndSend();
 		break;
 
 	case (PONT):
-		PRINTF("TC: TODO point mode");
+		//PRINTF("TC: TODO point mode");
+		imuRead.setControlType(0);
+		imuRead.setValue(value);
+		imuRead.setSetPointFlag();
+		imuRead.setFlag();
+		imuRead.setControlType(2);
 		break;
 
 	case (TRAC):
 		PRINTF("TC: TODO point mode");
+		imuRead.setControlType(0);
+		imuRead.setValue(value);
+		imuRead.setSetPointFlag();
+		imuRead.setFlag();
+		imuRead.setControlType(1);
 		break;
 
 	case (MISSION):
-		//thMission.toggleMission();
+		thMission.toggleMission();
 		break;
 
 	case (IRSM):
