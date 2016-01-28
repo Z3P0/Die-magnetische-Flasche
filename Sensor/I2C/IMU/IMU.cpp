@@ -16,22 +16,8 @@ HAL_GPIO CS_XM(GPIO_032);     // Chip select Accelerometer and Magnetometer
 HAL_I2C I2C_2(I2C_IDX2);
 
 /*
- * Stolen from
- * Author:  Christoph Hagen
- * Date:    January 7th, 2016
- *
- * This is a sample implementation of the ellipsoid fit approach.
- * The values for the matrix and the offset vector are
- * calculated by reading raw magnetometer values and feeding them
- * into the matlab script as a csv file. It then calculates the
- * necessary values and shows a plot of the calibration.
- * Check the proccess_raw_mag_data.m file for more instructions
+ * The rotation matrix from the matlab script Soft iron calibration
  */
-
-/*
- * The rotation matrix from the matlab script
- */
-
 float el_ma[3][3] = { { 4.2315, -0.6165, 0.0568 }, { -0.6165, 4.8364, -2.3262 }, { 0.0568, -2.3262, 23.8658 } };
 
 /*

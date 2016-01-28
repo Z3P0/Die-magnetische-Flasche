@@ -17,9 +17,7 @@ AHRS::AHRS(float sampleRate) {
 
 	setAllValuesToZero();
 
-	gx = 0;
-	gy = 0;
-	gz = 0;
+	gdz = 0;
 
 	rFus = 0;
 	pFus = 0;
@@ -68,6 +66,9 @@ void AHRS::filterUpdate2(IMU_Acc* acc, IMU_Gyro* gyr, IMU_Mag* mag) {
 	else if (yFus < 0)
 		yFus += (n+1) * 360;
 
+	// Most important values
+	yFinal = yFus;	// Yaw positon
+	gdz = gyr->dz;  // Yaw angular rate deg/s
 }
 
 void AHRS::simplePredict() {
@@ -81,6 +82,9 @@ void AHRS::simplePredict() {
 //	pre_yFus += (yFus * sampleRate);
 }
 
+/*
+ * Function to set the gain for the AHRS form extern
+ */
 void AHRS::setAlpha(float alpha) {
 
 	this->alpha = alpha;

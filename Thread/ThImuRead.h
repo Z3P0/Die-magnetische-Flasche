@@ -8,14 +8,15 @@
 #ifndef SENSOR_THIMUREAD_H_
 #define SENSOR_THIMUREAD_H_
 #include "../Extern/Include.h"
-#include "../Controller/PiController.h"
+#include "../Controller/Controller.h"
 #include "../Actuators/Hbridge.h"
+#include "../Sensor/Filter/AHRS.h"
 
 #define SAMPLES_SOFTCAL 1500
 
 class ThImuRead: public Thread {
 public:
-	ThImuRead(const char* name, Hbridge *flWheel);
+	ThImuRead(const char* name, Hbridge *flWheel, AHRS *ahrs);
 	virtual ~ThImuRead();
 	void init();
 	void run();
@@ -75,7 +76,15 @@ public:
 		return (send = !send);
 	}
 
+	//1- velocity 2- position
+	void setControlType(int type)
+	{
+		controlType = type;
+	}
+
 private:
+
+	AHRS *ahrs;
 	bool send;
 
 	bool flag;	 // Flag to leave the main loop
@@ -112,6 +121,7 @@ private:
 
 	int value;
 	float setPoint;
+	int controlType; //1-velocity 2- position
 
 	// Reference to the motor
 	Hbridge *flWheel;

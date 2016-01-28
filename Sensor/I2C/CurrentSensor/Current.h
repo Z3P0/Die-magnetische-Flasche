@@ -69,8 +69,10 @@ public:
 	// return [0] power; return [1] current
 	void getPowerCurrent(float *values);
 	virtual ~Current();
-	// Read raw vales
+	// Read raw values
 	int8_t read();
+	float getCurrent();
+	float getVoltage();
 
 private:
 	// The register addresses of the INA219 current sensor

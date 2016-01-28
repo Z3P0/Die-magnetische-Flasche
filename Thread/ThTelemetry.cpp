@@ -7,34 +7,34 @@
 
 #include "ThTelemetry.h"
 #include "../Extern/Extern.h"
-#include "../Sensor/I2C/IMU/IMU.h"
-#include "../Sensor/Filter/MadgwickFilter.h"
+#include "../Sensor/I2C/Current/Current.h"
 
-
-ThTelemetry::ThTelemetry(const char* name) {}
-
-ThTelemetry::~ThTelemetry() {}
-
-void ThTelemetry::init(){
-	//bluetooth_uart.init(115200);
-	BlueLED.init(true,1,1);
+ThTelemetry::ThTelemetry(const char* name, AHRS *ahrs, SolarPannel *solPan, Light *lightSensor) {
+	this->ahrs = ahrs;
+	this->solPan = solPan;
+	this->lightSensor = lightSensor;
 }
 
-void ThTelemetry:: run(){
-	/*
-	IMU imu(this);
-	imu.accSetDefaultValues();
-	imu.gyrCalibrate();
-	imu.magCalibrate();
-	int cnt = 0;
-	int cnt2 = 0;
-	float gain = 10;
-	float eulAng[3];
-	MadgwickFilter madf(0.01, gain);
-	madf.resetFilter();
-	char sprintOut[100];
-	TelemetryPacket tmp;*/
-	TIME_LOOP(NOW(), MILLISECONDS*100){
+ThTelemetry::~ThTelemetry() {
+}
+
+void ThTelemetry::init() {
+	//bluetooth_uart.init(115200);
+	BlueLED.init(true, 1, 1);
+}
+
+void ThTelemetry::run() {
+
+	// Current
+	//Current batteries(ADDR_BATT);
+
+
+	suspendCallerUntil(NOW() + 8*SECONDS); //Initialization delay
+
+	TIME_LOOP(NOW(), MILLISECONDS*200)
+	{
+		BlueLED.setPins(~BlueLED.readPins());
+		//continue;
 #ifdef PROTOCOL_BINARY
 
 		char buff[22];
@@ -45,37 +45,29 @@ void ThTelemetry:: run(){
 		buff[2] = 0xAA;
 		buff[3] = 0x01;
 
-		//Roll
-		buff[4] = 0x00;
-		buff[5] = 0x02;
+		// Roll
+		SerializationUtil::WriteInt((int16_t) (ahrs->rFus), buff, 4);
 
-		//pitch
-		buff[6] = 0x00;
-		buff[7] = 0x04;
+		// Pitch
+		SerializationUtil::WriteInt((int16_t) (ahrs->pFus), buff, 6);
 
-		//yaw
-		buff[8] = 0x00;
-		buff[9] = 0x06;
+		// Yaw
+		SerializationUtil::WriteInt((int16_t) (ahrs->yFus), buff, 8);
 
-		//Battery volt
-		buff[10] = 0x00;
-		buff[11] = 0x08;
+		// Batteries voltage
+		//SerializationUtil::WriteInt((int16_t) (batteries.getVoltage() * 1000), buff, 10);
 
-		//Battery current
-		buff[12] = 0x00;
-		buff[13] = 0x02;
+		// Batteries current
+		//SerializationUtil::WriteInt((int16_t) (batteries.getCurrent() * 1000), buff, 12);
 
-		//Panal volt
-		buff[14] = 0x00;
-		buff[15] = 0x0A;
+		// Panal voltage
+		SerializationUtil::WriteInt((int16_t) (solPan->getVoltage() * 1000), buff, 14);
 
-		//Panal current
-		buff[16] = 0x00;
-		buff[17] = 0x01;
+		// Panal current
+		SerializationUtil::WriteInt((int16_t) (solPan->getVoltage() * 1000), buff, 16);
 
-		//Light sensor value
-		buff[18] = 0x00;
-		buff[19] = 0x10;
+		// Light sensor value
+		SerializationUtil::WriteInt((int16_t) (lightSensor->getLuxValue()), buff, 18);
 
 		//operation mode
 		buff[20] = 0x00;
@@ -83,42 +75,30 @@ void ThTelemetry:: run(){
 
 		BT_Semaphore.enter();
 		writeToBT(buff, 22);
-		while(!uart_stdout.isWriteFinished());
 		BT_Semaphore.leave();
 #else
+		continue;
+		char printftOut[80];
+		// Filtered angels Roll, Pitch, Yaw
+		sprintf(printftOut, "r: %.1f deg p: %.1fdeg y: %.1fdeg\r\n", ahrs->rFus, ahrs->pFus ,ahrs->yFus);
+		PRINTF(printftOut);
+
+		// Batteries voltage & current
+		//sprintf(printftOut, "Batteries %.1f[V] %.1f[A]\r\n", batteries.getVoltage(), batteries.getCurrent());
+		//PRINTF(printftOut);
+
+		//Panal voltage & current
+		sprintf(printftOut, "Solar pannels %.1f[V]  %.1f[V]\r\n", solPan->getCurrent(), solPan->getVoltage());
+		PRINTF(printftOut);
+
+		//Light sensor value
+		sprintf(printftOut, "Light Sensor %.1f[Lux]\r\n", lightSensor->getLuxValue());
+		PRINTF(printftOut);
+
+		//operation mode
 #endif
-		/*
-		imu.accRead();
-		imu.gyrRead();
-		imu.magRead();
-		char *buffer;
-		madf.filterUpdate(imu.gyr.dx, imu.gyr.dy, imu.gyr.dz, imu.acc.x, imu.acc.y, imu.acc.z, imu.mag.x, imu.mag.y, imu.mag.z);
-
-
-		if ((gain > 2.5) && (cnt2++ > 200)) {
-			cnt2 = 0;
-			gain = (gain - 0.5);
-			madf.setGain(gain);
-			PRINTF("Set gain %f \r\n", gain);
-		}
-		if (cnt++ > 40) {
-			cnt = 0;
-			madf.getEulerAnglesDeg(eulAng);
-
-			//tmp.roll = (int16_t)eulAng[0];
-			//tmp.pitch = (int16_t)eulAng[1];
-			//tmp.yaw = (int16_t)eulAng[2];
-
-			//tmp.writeToBt();
-
-			//sprintf(buffer, "F R:%d P%d Y%d\r\n", (int16_t)eulAng[0], (int16_t)eulAng[1], (int16_t)eulAng[2]);
-
-
-
-		}*/
-
-		BlueLED.setPins(~BlueLED.readPins());
-		//bluetooth_uart.write("Alive\r\n", sizeof("Alive\r\n"));
 
 	}
+
 }
+

@@ -26,12 +26,12 @@ ThCamera::~ThCamera() {
 
 void ThCamera::run()
 {
+	suspendCallerUntil(NOW() + 5*SECONDS);
 	cam.init();
 	while(1)
 	{
 		//Suspend until request received
 		suspendCallerUntil();
-
 		cam.takePicture();
 
 #ifdef PROTOCOL_BINARY
@@ -57,14 +57,6 @@ void ThCamera::run()
 	PRINTF("I");
 #endif
 		writeToBT((char *)DCMI_Buffer, IMAGESIZE);
-
-//		int bytesSent = 0;
-//		while(bytesSent<IMAGESIZE)
-//		{
-//			bytesSent += uart_stdout.write((char *)(DCMI_Buffer + bytesSent), IMAGESIZE - bytesSent);
-//			while(!uart_stdout.isWriteFinished());
-//		}
-
 		//Release bluetooth
 		BT_Semaphore.leave();
 	}

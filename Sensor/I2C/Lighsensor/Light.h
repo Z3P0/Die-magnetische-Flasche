@@ -52,7 +52,7 @@ public:
 	int16_t read();
 	int16_t ch0;     // Channel 0: Visible + IR light
 	int16_t ch1;     // Channel 1: IR light
-
+	void init();
 
 private:
 //	int16_t read();
@@ -65,7 +65,7 @@ private:
 	const uint8_t CHANNEL_0_LOW[1] = { CH0_DATA_LOW };
 	const uint8_t CHANNEL_1_LOW[1] = { CH1_DATA_LOW };
 
-	void init();
+
 
 };
 
