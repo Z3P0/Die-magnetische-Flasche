@@ -5,7 +5,7 @@
  *      Author: pinker
  */
 
-#include "PiController.h"
+#include "Controller.h"
 
 PiController::PiController() {
 	dt = SAMPLING_TIME;     	// Sampling time of the control function

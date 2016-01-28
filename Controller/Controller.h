@@ -5,8 +5,8 @@
  *      Author: pinker
  */
 
-#ifndef CONTROLLER_PICONTROLLER_H_
-#define CONTROLLER_PICONTROLLER_H_
+#ifndef CONTROLLER_CONTROLLER_H_
+#define CONTROLLER_CONTROLLER_H_
 #include "../Define/Define.h"
 #include "../Extern/Include.h"
 #include "../Extern/Extern.h"
@@ -85,4 +85,4 @@ public:
 	float factor;
 };
 
-#endif /* CONTROLLER_PICONTROLLER_H_ */
+#endif /* CONTROLLER_CONTROLLER_H_ */

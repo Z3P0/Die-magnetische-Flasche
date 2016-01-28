@@ -8,7 +8,7 @@
 #ifndef SENSOR_THIMUREAD_H_
 #define SENSOR_THIMUREAD_H_
 #include "../Extern/Include.h"
-#include "../Controller/PiController.h"
+#include "../Controller/Controller.h"
 #include "../Actuators/Hbridge.h"
 #include "../Sensor/Filter/AHRS.h"
 

@@ -20,7 +20,7 @@ IR::IR(HAL_ADC * adc, ADC_CHANNEL cha) {
 IR::~IR() {}
 
 void IR::init() {
-	//sensor->config(ADC_PARAMETER_RESOLUTION, 12);
+	// Sensor->config(ADC_PARAMETER_RESOLUTION, 12);
 	sensor->init(channel);
 }
 
@@ -33,7 +33,7 @@ float IR::read() {
 float IR::readInternal() {
 	int32_t val = sensor->read(channel);
 	val = val & 0xFFFFFFF8;     //Removing noise on LSBs
-	// TODO Check the magic value 819
+	// 12 bit (4096)/ Revvoltage 5 V
 	return ((float) val) / 819; // Calculated somehow
 }
 

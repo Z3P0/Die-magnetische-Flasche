@@ -27,11 +27,19 @@ void SolarPannel::init() {
 
 SolarPannel::~SolarPannel() {}
 
+/* Read function for both ADC
+ * 1) Voltage
+ * 2) Currency
+ * @param readChannel
+ * */
 int32_t SolarPannel::read(ADC_CHANNEL *channel) {
 	int32_t val = sensor->read(chVoltage);
 	return val;
 }
 
+/*
+ * Voltage divider resistor formula implemented
+ */
 float SolarPannel::getVoltage() {
 	// Resolution 12 bit = 4096
 	// Max Voltage = 3.3 V
@@ -40,6 +48,9 @@ float SolarPannel::getVoltage() {
 	return mes * volVal;
 }
 
+/*
+ * Voltage and Current divider resistor formula implemented
+ */
 float SolarPannel::getCurrent() {
 
 	//TODO check that!
@@ -48,6 +59,9 @@ float SolarPannel::getCurrent() {
 	return (getVoltage() /R1 + cur * curVal + cur/R5);
 }
 
+/*
+ * P = U * I
+ */
 float SolarPannel::getPower(){
 	return (getCurrent() * getVoltage());
 }
